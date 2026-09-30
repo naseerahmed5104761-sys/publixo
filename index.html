@@ -1,0 +1,1523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PubliXo — Publishing & Beyond | Web Development & Digital Marketing</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Cinzel:wght@600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --gold: #f59e0b;
+            --gold-light: #fbbf24;
+            --gold-dark: #d97706;
+            --blue: #3b82f6;
+            --blue-dark: #1d4ed8;
+            --blue-light: #60a5fa;
+            --navy: #0a0f1e;
+            --navy-2: #111827;
+            --navy-3: #1a2332;
+            --gray: #94a3b8;
+            --gray-dark: #64748b;
+            --light: #f8fafc;
+            --white: #ffffff;
+            --gradient-gold: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+            --gradient-blue: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+            --gradient-royal: linear-gradient(135deg, #f59e0b 0%, #3b82f6 100%);
+            --shadow-gold: 0 4px 20px rgba(245, 158, 11, 0.35);
+            --shadow-blue: 0 4px 20px rgba(59, 130, 246, 0.35);
+            --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.3), 0 8px 10px -6px rgba(0,0,0,0.3);
+            --radius: 12px;
+            --radius-lg: 20px;
+            --radius-xl: 28px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            color: #e2e8f0;
+            background: var(--navy);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .royal-font { font-family: 'Cinzel', serif; }
+
+        /* ===== NAVBAR ===== */
+        .navbar {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 1000;
+            background: rgba(10, 15, 30, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(245, 158, 11, 0.15);
+            transition: all 0.3s ease;
+        }
+
+        .navbar.scrolled {
+            box-shadow: 0 4px 30px rgba(0,0,0,0.5);
+            border-bottom-color: rgba(245, 158, 11, 0.3);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 76px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            font-weight: 800;
+            font-size: 1.4rem;
+            color: white;
+            letter-spacing: -0.5px;
+        }
+
+        .logo-img {
+            width: 48px; height: 48px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(245, 158, 11, 0.4);
+            box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .logo:hover .logo-img {
+            box-shadow: 0 0 30px rgba(245, 158, 11, 0.6);
+            transform: scale(1.05);
+        }
+
+        .logo-text { font-family: 'Cinzel', serif; font-weight: 800; }
+        .logo-text .blue { color: var(--blue-light); }
+        .logo-text .gold { color: var(--gold-light); }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #cbd5e1;
+            font-weight: 500;
+            font-size: 0.9rem;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--gold-light);
+            background: rgba(245, 158, 11, 0.08);
+        }
+
+        .nav-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--gradient-gold);
+            color: var(--navy) !important;
+            padding: 10px 22px !important;
+            border-radius: 50px !important;
+            font-weight: 700 !important;
+            font-size: 0.9rem;
+            transition: all 0.3s ease !important;
+            box-shadow: var(--shadow-gold);
+        }
+
+        .nav-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(245, 158, 11, 0.55) !important;
+            color: var(--navy) !important;
+        }
+
+        .mobile-toggle {
+            display: none;
+            background: none; border: none;
+            font-size: 1.5rem;
+            color: var(--gold-light);
+            cursor: pointer;
+            padding: 8px;
+        }
+
+        /* ===== HERO ===== */
+        .hero {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 130px 24px 80px;
+            background: var(--navy);
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(245, 158, 11, 0.12) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            top: 50%; left: 75%;
+            transform: translate(-50%, -50%);
+            width: 600px; height: 600px;
+            border-radius: 50%;
+            border: 1px solid rgba(245, 158, 11, 0.15);
+            box-shadow: 0 0 80px rgba(245, 158, 11, 0.1), inset 0 0 80px rgba(59, 130, 246, 0.05);
+            animation: rotateRing 30s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes rotateRing {
+            from { transform: translate(-50%, -50%) rotate(0deg); }
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        .hero-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            color: var(--gold-light);
+            padding: 8px 18px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 24px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .hero-badge i { color: var(--gold); }
+
+        .hero h1 {
+            font-family: 'Cinzel', serif;
+            font-size: clamp(2rem, 4.5vw, 3.4rem);
+            font-weight: 800;
+            color: white;
+            line-height: 1.15;
+            letter-spacing: -0.5px;
+            margin-bottom: 20px;
+        }
+
+        .hero h1 .gradient-text {
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 1.05rem;
+            color: #94a3b8;
+            max-width: 520px;
+            margin-bottom: 36px;
+            line-height: 1.8;
+        }
+
+        .hero-buttons { display: flex; gap: 16px; flex-wrap: wrap; }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px 34px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+            font-family: inherit;
+        }
+
+        .btn-gold {
+            background: var(--gradient-gold);
+            color: var(--navy);
+            box-shadow: var(--shadow-gold);
+            font-weight: 700;
+        }
+
+        .btn-gold:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(245, 158, 11, 0.55);
+        }
+
+        .btn-outline-gold {
+            background: transparent;
+            color: var(--gold-light);
+            border: 2px solid rgba(245, 158, 11, 0.4);
+        }
+
+        .btn-outline-gold:hover {
+            border-color: var(--gold);
+            background: rgba(245, 158, 11, 0.08);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(245, 158, 11, 0.2);
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 40px;
+            margin-top: 48px;
+            padding-top: 32px;
+            border-top: 1px solid rgba(245, 158, 11, 0.15);
+        }
+
+        .hero-stat h3 {
+            font-family: 'Cinzel', serif;
+            font-size: 1.9rem;
+            font-weight: 800;
+            color: var(--gold-light);
+            letter-spacing: -0.5px;
+        }
+
+        .hero-stat p {
+            font-size: 0.75rem;
+            color: #64748b;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 600;
+        }
+
+        .hero-visual {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .hero-card {
+            background: linear-gradient(135deg, rgba(26, 35, 50, 0.9) 0%, rgba(10, 15, 30, 0.9) 100%);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            border-radius: var(--radius-xl);
+            padding: 36px 30px;
+            backdrop-filter: blur(20px);
+            width: 100%;
+            max-width: 440px;
+            animation: floatCard 6s ease-in-out infinite;
+            text-align: center;
+            box-shadow: 0 0 60px rgba(245, 158, 11, 0.1), inset 0 1px 0 rgba(255,255,255,0.05);
+            position: relative;
+        }
+
+        .hero-card::before {
+            content: '';
+            position: absolute;
+            top: -1px; left: 50%;
+            transform: translateX(-50%);
+            width: 60%; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+            border-radius: 2px;
+        }
+
+        @keyframes floatCard {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        .logo-glow-wrap {
+            width: 200px; height: 200px;
+            margin: 0 auto 24px;
+            border-radius: 50%;
+            padding: 5px;
+            background: conic-gradient(from 0deg, #f59e0b, #3b82f6, #fbbf24, #2563eb, #f59e0b);
+            box-shadow: 0 0 40px rgba(245, 158, 11, 0.5), 0 0 80px rgba(59, 130, 246, 0.3), 0 0 120px rgba(245, 158, 11, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: pulseGlow 4s ease-in-out infinite, rotateRing 20s linear infinite;
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 40px rgba(245, 158, 11, 0.5), 0 0 80px rgba(59, 130, 246, 0.3), 0 0 120px rgba(245, 158, 11, 0.15); }
+            50% { box-shadow: 0 0 60px rgba(245, 158, 11, 0.7), 0 0 100px rgba(59, 130, 246, 0.4), 0 0 150px rgba(245, 158, 11, 0.25); }
+        }
+
+        .logo-glow-inner {
+            width: 100%; height: 100%;
+            border-radius: 50%;
+            background: var(--navy);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border: 2px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .logo-glow-inner img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+
+        .hero-card-brand {
+            font-family: 'Cinzel', serif;
+            color: white;
+            font-size: 1.7rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .hero-card-brand .blue { color: var(--blue-light); }
+        .hero-card-brand .gold { color: var(--gold-light); }
+
+        .hero-card-tagline {
+            color: var(--gray-dark);
+            font-size: 0.7rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 26px;
+            font-weight: 600;
+        }
+
+        .service-mini {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 16px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(245, 158, 11, 0.1);
+            border-radius: var(--radius);
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+
+        .service-mini:hover {
+            background: rgba(245, 158, 11, 0.06);
+            border-color: rgba(245, 158, 11, 0.35);
+            transform: translateX(5px);
+            box-shadow: 0 4px 20px rgba(245, 158, 11, 0.15);
+        }
+
+        .service-mini-icon {
+            width: 42px; height: 42px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .service-mini-icon.gold { background: rgba(245, 158, 11, 0.15); color: var(--gold-light); }
+        .service-mini-icon.blue { background: rgba(59, 130, 246, 0.15); color: var(--blue-light); }
+        .service-mini-icon.gold-blue { background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(59,130,246,0.15)); color: var(--gold-light); }
+        .service-mini-icon.blue-gold { background: linear-gradient(135deg, rgba(59,130,246,0.15), rgba(245,158,11,0.15)); color: var(--blue-light); }
+
+        .service-mini-text h4 { color: white; font-size: 0.85rem; font-weight: 600; margin-bottom: 2px; }
+        .service-mini-text p { color: #64748b; font-size: 0.72rem; margin: 0; }
+
+        /* ===== SECTION STYLES ===== */
+        .section { padding: 100px 24px; position: relative; }
+        .section-container { max-width: 1200px; margin: 0 auto; }
+
+        .section-header {
+            text-align: center;
+            max-width: 660px;
+            margin: 0 auto 64px;
+        }
+
+        .section-label {
+            display: inline-block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: var(--gold);
+            margin-bottom: 14px;
+        }
+
+        .section-title {
+            font-family: 'Cinzel', serif;
+            font-size: clamp(1.7rem, 3.5vw, 2.6rem);
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            line-height: 1.2;
+            margin-bottom: 16px;
+            color: white;
+        }
+
+        .section-title .gold { color: var(--gold-light); }
+        .section-title .blue { color: var(--blue-light); }
+
+        .section-subtitle { font-size: 1rem; color: var(--gray-dark); line-height: 1.8; }
+
+        /* ===== SERVICES GRID ===== */
+        .services-section { background: linear-gradient(180deg, var(--navy) 0%, var(--navy-2) 100%); }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 24px;
+        }
+
+        .service-card {
+            background: linear-gradient(135deg, rgba(26, 35, 50, 0.8) 0%, rgba(17, 24, 39, 0.8) 100%);
+            border-radius: var(--radius-lg);
+            padding: 36px 32px;
+            border: 1px solid rgba(245, 158, 11, 0.1);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .service-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--gold), var(--blue), var(--gold));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .service-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4), 0 0 40px rgba(245, 158, 11, 0.1);
+            border-color: rgba(245, 158, 11, 0.35);
+        }
+
+        .service-card:hover::before { opacity: 1; }
+
+        .service-icon {
+            width: 58px; height: 58px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            margin-bottom: 24px;
+            transition: all 0.3s ease;
+        }
+
+        .service-card:hover .service-icon { transform: scale(1.1) rotate(-5deg); }
+
+        .service-icon.gold { background: rgba(245, 158, 11, 0.12); color: var(--gold-light); border: 1px solid rgba(245, 158, 11, 0.2); }
+        .service-icon.blue { background: rgba(59, 130, 246, 0.12); color: var(--blue-light); border: 1px solid rgba(59, 130, 246, 0.2); }
+        .service-icon.gold-blue { background: linear-gradient(135deg, rgba(245,158,11,0.12), rgba(59,130,246,0.12)); color: var(--gold-light); border: 1px solid rgba(245, 158, 11, 0.2); }
+        .service-icon.blue-gold { background: linear-gradient(135deg, rgba(59,130,246,0.12), rgba(245,158,11,0.12)); color: var(--blue-light); border: 1px solid rgba(59, 130, 246, 0.2); }
+
+        .service-card h3 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            letter-spacing: -0.2px;
+            color: white;
+        }
+
+        .service-card > p {
+            color: var(--gray);
+            font-size: 0.88rem;
+            line-height: 1.7;
+            margin-bottom: 20px;
+            flex-grow: 1;
+        }
+
+        .service-features {
+            list-style: none;
+            margin-bottom: 24px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .service-features li {
+            font-size: 0.72rem;
+            color: var(--gold-light);
+            background: rgba(245, 158, 11, 0.08);
+            padding: 5px 12px;
+            border-radius: 50px;
+            font-weight: 500;
+            border: 1px solid rgba(245, 158, 11, 0.15);
+        }
+
+        .service-price {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 20px;
+            border-top: 1px solid rgba(245, 158, 11, 0.1);
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .service-price .price-tag {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .service-price .price-label {
+            font-size: 0.68rem;
+            color: var(--gray-dark);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .service-price .price-value {
+            font-family: 'Cinzel', serif;
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: var(--gold-light);
+            letter-spacing: 0.3px;
+        }
+
+        .service-price .price-value .old-price {
+            font-size: 0.78rem;
+            color: var(--gray-dark);
+            text-decoration: line-through;
+            font-weight: 500;
+            margin-left: 6px;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .service-price a {
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--navy);
+            background: var(--gradient-gold);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.3s ease;
+            padding: 8px 16px;
+            border-radius: 50px;
+            box-shadow: 0 2px 10px rgba(245, 158, 11, 0.3);
+            white-space: nowrap;
+        }
+
+        .service-price a:hover {
+            gap: 10px;
+            box-shadow: 0 4px 20px rgba(245, 158, 11, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .service-card.featured {
+            border-color: rgba(245, 158, 11, 0.4);
+            box-shadow: 0 0 40px rgba(245, 158, 11, 0.08);
+        }
+
+        .service-card.featured::before { opacity: 1; }
+
+        .service-badge-new {
+            position: absolute;
+            top: 20px; right: 20px;
+            background: var(--gradient-gold);
+            color: var(--navy);
+            font-size: 0.65rem;
+            font-weight: 800;
+            padding: 4px 12px;
+            border-radius: 50px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+        }
+
+        /* ===== CATEGORIES ===== */
+        .categories-section { background: var(--navy-2); }
+
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+
+        .category-card {
+            border-radius: var(--radius-lg);
+            padding: 40px 32px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s ease;
+            color: white;
+            border: 1px solid rgba(245, 158, 11, 0.15);
+        }
+
+        .category-card.web { background: linear-gradient(135deg, rgba(37, 99, 235, 0.25) 0%, rgba(10, 15, 30, 0.9) 100%); }
+        .category-card.marketing { background: linear-gradient(135deg, rgba(245, 158, 11, 0.25) 0%, rgba(10, 15, 30, 0.9) 100%); }
+        .category-card.creative { background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(245, 158, 11, 0.15) 50%, rgba(10, 15, 30, 0.9) 100%); }
+
+        .category-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4), 0 0 40px rgba(245, 158, 11, 0.15);
+            border-color: rgba(245, 158, 11, 0.4);
+        }
+
+        .category-card::after {
+            content: '';
+            position: absolute;
+            top: -50%; right: -50%;
+            width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(245, 158, 11, 0.06) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        .category-icon {
+            width: 56px; height: 56px;
+            background: rgba(245, 158, 11, 0.12);
+            border: 1px solid rgba(245, 158, 11, 0.25);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            color: var(--gold-light);
+        }
+
+        .category-card h3 {
+            font-family: 'Cinzel', serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 18px;
+            letter-spacing: 0.5px;
+            color: white;
+        }
+
+        .category-card ul {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .category-card ul li {
+            font-size: 0.85rem;
+            color: #cbd5e1;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .category-card ul li i {
+            font-size: 0.5rem;
+            color: var(--gold);
+        }
+
+        /* ===== CTA SECTION ===== */
+        .cta-section {
+            background: linear-gradient(135deg, #0a0f1e 0%, #1a2332 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-section::before {
+            content: '';
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 800px; height: 800px;
+            border-radius: 50%;
+            border: 1px solid rgba(245, 158, 11, 0.1);
+            box-shadow: 0 0 100px rgba(245, 158, 11, 0.08), inset 0 0 100px rgba(59, 130, 246, 0.05);
+            pointer-events: none;
+        }
+
+        .cta-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            max-width: 720px;
+            margin: 0 auto;
+        }
+
+        .cta-logo-wrap {
+            width: 120px; height: 120px;
+            margin: 0 auto 28px;
+            border-radius: 50%;
+            padding: 4px;
+            background: conic-gradient(from 0deg, #f59e0b, #3b82f6, #fbbf24, #2563eb, #f59e0b);
+            box-shadow: 0 0 50px rgba(245, 158, 11, 0.4), 0 0 100px rgba(59, 130, 246, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: pulseGlow 4s ease-in-out infinite;
+        }
+
+        .cta-logo-inner {
+            width: 100%; height: 100%;
+            border-radius: 50%;
+            background: var(--navy);
+            overflow: hidden;
+            border: 2px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .cta-logo-inner img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+
+        .cta-content h2 {
+            font-family: 'Cinzel', serif;
+            font-size: clamp(1.7rem, 3.5vw, 2.6rem);
+            font-weight: 800;
+            color: white;
+            letter-spacing: -0.5px;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        .cta-content h2 .gold { color: var(--gold-light); }
+
+        .cta-content p {
+            font-size: 1rem;
+            color: var(--gray);
+            margin-bottom: 36px;
+            line-height: 1.8;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-whatsapp {
+            background: #25d366;
+            color: white;
+            box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4);
+            font-weight: 700;
+        }
+
+        .btn-whatsapp:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(37, 211, 102, 0.55);
+            background: #22c55e;
+        }
+
+        .cta-contact-info {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 30px;
+            color: var(--gray-dark);
+            font-size: 0.9rem;
+        }
+
+        .cta-contact-info i { color: #25d366; font-size: 1.1rem; }
+        .cta-contact-info strong { color: var(--gold-light); }
+
+        .cta-tagline {
+            margin-top: 24px;
+            font-family: 'Cinzel', serif;
+            font-style: italic;
+            color: var(--gray-dark);
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+        }
+
+        .cta-tagline .blue { color: var(--blue-light); }
+        .cta-tagline .gold { color: var(--gold-light); }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            background: #060a14;
+            padding: 60px 24px 30px;
+            color: var(--gray-dark);
+            border-top: 1px solid rgba(245, 158, 11, 0.1);
+        }
+
+        .footer-container { max-width: 1200px; margin: 0 auto; }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 48px;
+            margin-bottom: 48px;
+        }
+
+        .footer-brand .logo { color: white; margin-bottom: 18px; }
+
+        .footer-brand p {
+            font-size: 0.86rem;
+            line-height: 1.8;
+            max-width: 300px;
+            color: var(--gray-dark);
+        }
+
+        .footer h4 {
+            color: var(--gold-light);
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 22px;
+        }
+
+        .footer ul {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .footer ul a {
+            color: var(--gray-dark);
+            text-decoration: none;
+            font-size: 0.86rem;
+            transition: all 0.2s ease;
+        }
+
+        .footer ul a:hover { color: var(--gold-light); padding-left: 4px; }
+
+        .footer-bottom {
+            border-top: 1px solid rgba(245, 158, 11, 0.1);
+            padding-top: 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .footer-bottom p { font-size: 0.82rem; }
+
+        .footer-bottom .tagline {
+            font-family: 'Cinzel', serif;
+            font-style: italic;
+            color: var(--gold-dark);
+            font-size: 0.8rem;
+            letter-spacing: 0.5px;
+        }
+
+        .footer-social { display: flex; gap: 12px; }
+
+        .footer-social a {
+            width: 40px; height: 40px;
+            border-radius: 12px;
+            background: rgba(245, 158, 11, 0.06);
+            border: 1px solid rgba(245, 158, 11, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gray-dark);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .footer-social a:hover {
+            background: var(--gradient-gold);
+            border-color: var(--gold);
+            color: var(--navy);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-gold);
+        }
+
+        /* ===== SCROLL ANIMATIONS ===== */
+        .fade-up {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.7s ease, transform 0.7s ease;
+        }
+
+        .fade-up.visible { opacity: 1; transform: translateY(0); }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 1024px) {
+            .hero-container { grid-template-columns: 1fr; gap: 50px; }
+            .hero-visual { display: flex; }
+            .hero p { max-width: 100%; }
+            .categories-grid { grid-template-columns: 1fr 1fr; }
+            .footer-grid { grid-template-columns: 1fr 1fr; gap: 36px; }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 76px; left: 0; right: 0;
+                background: rgba(10, 15, 30, 0.98);
+                backdrop-filter: blur(20px);
+                flex-direction: column;
+                padding: 16px 24px 24px;
+                border-bottom: 1px solid rgba(245, 158, 11, 0.2);
+                box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+                gap: 4px;
+            }
+
+            .nav-links.active { display: flex; }
+            .nav-links a { width: 100%; padding: 12px 16px; color: #cbd5e1; }
+            .nav-cta { width: 100%; justify-content: center; margin-top: 8px; }
+            .mobile-toggle { display: block; }
+            .hero { min-height: auto; padding: 110px 20px 60px; }
+            .hero::after { width: 400px; height: 400px; left: 50%; }
+            .hero-stats { gap: 24px; }
+            .hero-stat h3 { font-size: 1.5rem; }
+            .section { padding: 70px 20px; }
+            .services-grid { grid-template-columns: 1fr; }
+            .categories-grid { grid-template-columns: 1fr; }
+            .footer-grid { grid-template-columns: 1fr; gap: 32px; }
+            .footer-bottom { flex-direction: column; text-align: center; }
+        }
+
+        @media (max-width: 480px) {
+            .hero h1 { font-size: 1.7rem; }
+            .hero-buttons { flex-direction: column; }
+            .hero-buttons .btn { width: 100%; justify-content: center; }
+            .hero-stats { flex-direction: column; gap: 16px; }
+            .cta-buttons { flex-direction: column; }
+            .cta-buttons .btn { width: 100%; justify-content: center; }
+            .logo-glow-wrap { width: 160px; height: 160px; }
+            .logo-text { font-size: 1.2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== NAVBAR ===== -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <a href="#" class="logo">
+                <img src="logo.jpg" alt="PubliXo Logo" class="logo-img">
+                <span class="logo-text">Publi<span class="blue">X</span><span class="gold">o</span></span>
+            </a>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#services">Services</a></li>
+                <li><a href="#categories">Categories</a></li>
+                <li><a href="#contact">Contact</a></li>
+                <li><a href="https://wa.me/923015394177" class="nav-cta" target="_blank">
+                    <i class="fab fa-whatsapp"></i> Get a Quote
+                </a></li>
+            </ul>
+            <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle menu">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- ===== HERO ===== -->
+    <section class="hero" id="home">
+        <div class="hero-container">
+            <div class="hero-content">
+                <div class="hero-badge">
+                    <i class="fas fa-crown"></i> Publishing & Beyond
+                </div>
+                <h1>
+                    We Build <span class="gradient-text">Royal Digital Experiences</span> That Grow Your Business
+                </h1>
+                <p>
+                    From professional WordPress websites to complete digital marketing strategies — PubliXo delivers modern, responsive, and performance-driven solutions tailored to your business goals.
+                </p>
+                <div class="hero-buttons">
+                    <a href="#services" class="btn btn-gold">
+                        <i class="fas fa-rocket"></i> Explore Services
+                    </a>
+                    <a href="https://wa.me/923015394177" class="btn btn-outline-gold" target="_blank">
+                        <i class="fab fa-whatsapp"></i> WhatsApp Us
+                    </a>
+                </div>
+                <div class="hero-stats">
+                    <div class="hero-stat">
+                        <h3>11+</h3>
+                        <p>Services</p>
+                    </div>
+                    <div class="hero-stat">
+                        <h3>100%</h3>
+                        <p>Responsive</p>
+                    </div>
+                    <div class="hero-stat">
+                        <h3>24/7</h3>
+                        <p>Support</p>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="hero-card">
+                    <div class="logo-glow-wrap">
+                        <div class="logo-glow-inner">
+                            <img src="logo.jpg" alt="PubliXo Logo">
+                        </div>
+                    </div>
+                    <h3 class="hero-card-brand">Publi<span class="blue">X</span><span class="gold">o</span></h3>
+                    <p class="hero-card-tagline">Publishing & Beyond</p>
+
+                    <div class="service-mini">
+                        <div class="service-mini-icon blue"><i class="fab fa-wordpress"></i></div>
+                        <div class="service-mini-text">
+                            <h4>WordPress Development</h4>
+                            <p>Starting from PKR 6,000</p>
+                        </div>
+                    </div>
+                    <div class="service-mini">
+                        <div class="service-mini-icon gold"><i class="fas fa-cart-shopping"></i></div>
+                        <div class="service-mini-text">
+                            <h4>E-Commerce Solutions</h4>
+                            <p>Starting from PKR 45,000</p>
+                        </div>
+                    </div>
+                    <div class="service-mini">
+                        <div class="service-mini-icon gold-blue"><i class="fas fa-bullhorn"></i></div>
+                        <div class="service-mini-text">
+                            <h4>Meta Ads Management</h4>
+                            <p>Starting from PKR 6,000</p>
+                        </div>
+                    </div>
+                    <div class="service-mini">
+                        <div class="service-mini-icon blue-gold"><i class="fas fa-qrcode"></i></div>
+                        <div class="service-mini-text">
+                            <h4>Dynamic QR Code Service</h4>
+                            <p>Starting from PKR 1,000/month</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== SERVICES ===== -->
+    <section class="section services-section" id="services">
+        <div class="section-container">
+            <div class="section-header fade-up">
+                <div class="section-label">Our Services</div>
+                <h2 class="section-title">Everything Your Business Needs to <span class="gold">Succeed Online</span></h2>
+                <p class="section-subtitle">
+                    From web development to digital marketing — we provide end-to-end solutions designed for growth, performance, and results.
+                </p>
+            </div>
+
+            <div class="services-grid">
+                <!-- 1. WordPress Website Development -->
+                <div class="service-card fade-up">
+                    <div class="service-icon blue"><i class="fab fa-wordpress"></i></div>
+                    <h3>WordPress Website Development</h3>
+                    <p>Get a professional, modern, responsive WordPress website designed specifically for your business. We create user-friendly websites with clean layouts, mobile responsiveness, SEO-friendly structure, and performance optimization.</p>
+                    <ul class="service-features">
+                        <li>Business Website</li>
+                        <li>Elementor</li>
+                        <li>Responsive</li>
+                        <li>SEO Setup</li>
+                        <li>Speed Optimization</li>
+                    </ul>
+                    <div class="service-price">
+                        <div class="price-tag">
+                            <span class="price-label">Starting From</span>
+                            <span class="price-value">PKR 6,000 <span class="old-price">7,000</span></span>
+                        </div>
+                        <a href="https://wa.me/923015394177" target="_blank">Get Quote <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+
+                <!-- 2. Custom Web Development -->
+                <div class="service-card fade-up">
+                    <div class="service-icon gold-blue"><i class="fas fa-code"></i></div>
+                    <h3>Custom Web Development</h3>
+                    <p>Build a powerful website tailored to your business requirements. PubliXo develops modern, responsive, and functional websites focused on performance, usability, and professional presentation.</p>
+                    <ul class="service-features">
+                        <li>Custom Development</li>
+                        <li>Responsive Design</li>
+                        <li>Custom Features</li>
+                        <li>Performance</li>
+                        <li>Maintenance</li>
+                    </ul>
+                    <div class="service-price">
+                        <div class="price-tag">
+                            <span class="price-label">Starting From</span>
+                            <span class="price-value">PKR 18,000 <span class="old-price">20,000</span></span>
+                        </div>
+                        <a href="https://wa.me/923015394177" target="_blank">Get Quote <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+
+                <!-- 3. E-Commerce Website Development -->
+                <div class="service-card fade-up">
+                    <div class="service-icon gold"><i class="fas fa-store"></i></div>
+                    <h3>E-Commerce Website Development</h3>
+                    <p>Launch your online store with a professional e-commerce website built to showcase products, manage orders, and provide customers with a smooth shopping experience.</p>
+                    <ul class="service-features">
+                        <li>WooCommerce</li>
+                        <li>Shopping Cart</li>
+                        <li>Payment Integration</li>
+                        <li>Product Setup</li>
+                        <li>Store Optimization</li>
+                    </ul>
+                    <div class="service-price">
+                        <div class="price-tag">
+                            <span class="price-label">Starting From</span>
+                            <span class="price-value">PKR 45,000 <span class="old-price">50,000</span></span>
+                        </div>
+                        <a href="https://wa.me/923015394177" target="_blank">Get Quote <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+
+                <!-- 4. WordPress Website Redesign -->
+                <div class="service-card fade-up">
+                    <div class="service-icon blue-gold"><i class="fas fa-paint-brush"></i></div>
+                    <h3>WordPress Website Redesign</h3>
+                    <p>Have an outdated or poorly designed website? PubliXo can transform your existing WordPress website with a modern design, improved user experience, responsive layouts, and better performance.</p>
+                    <ul class="service-features">
+                        <li>Modern UI/UX</li>
+                        <li>Elementor</li>
+                        <li>Mobile Optimization</li>
+                        <li>Speed Improvements</li>
+                        <li>Content Layout</li>
+                    </ul>
+                    <div class="service-price">
+                        <div class="price-tag">
+                            <span class="price-label">Starting From</span>
+                            <span class="price-value">PKR 8,000 <span class="old-price">10,000</span></span>
+                        </div>
+                        <a href="https://wa.me/923015394177" target="_blank">Get Quote <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+
+                <!-- 5. Website Speed Optimization -->
+                <div class="service-card fade-up">
+                    <div class="service-icon gold"><i class="fas fa-gauge-high"></i></div>
+                    <h3>Website Speed Optimization</h3>
+                    <p>Improve your website's loading speed and performance with professional optimization. We identify performance issues and optimize your WordPress website for a faster and smoother user experience.</p>
+                    <ul class="service-features">
+                        <li>Image Optimization</li>
+                        <li>Cache Configuration</li>
+                        <li>CSS & JS</li>
+                        <li>Database</li>
+                        <li>Mobile Performance</li>
+                    </ul>
+                    <div class="service-price">
+                        <div class="price-tag">
+                            <span class="price-label">Starting From</span>
+                            <span class="price-value">PKR 7,000 <span class="old-price">8,000</span></span>
+                        </div>
+                        <a href="https://wa.me/923015394177" target="_blank">Get Quote <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+
+                <!-- 6. Meta Ads Management -->
+                <div class="service-card fade-up">
+                    <div class="service-icon blue"><i class="fas fa-bullhorn"></i></div>
+                    <h3>Meta Ads Management</h3>
+                    <p>Reach the right audience through targeted Facebook and Instagram advertising campaigns. PubliXo creates strategic Meta Ads campaigns designed to increase reach, traffic, leads, messages, and sales.</p>
+                    <ul class="service-features">
+                        <li>Facebook Ads</li>
+                        <li>Instagram Ads</li>
+                        <li>Audience Targeting</li>
+                        <li>Lead Generation</li>
+                        <li>Performance</li>
+                    </ul>
+                    <div class="service-price">
+                        <div class="price-tag">
+                            <span class="price-label">Starting From</span>
+                            <span class="price-value">PKR 6,000 <span class="old-price">7,000</span></span>
+                        </div>
+                        <a href="https://wa.me/923015394177" target="_blank">Get Quote <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+
+                <!-- 7. Social Media Management -->
+                <div class="service-card fade-up">
+                    <div class="service-icon gold-blue"><i class="fas fa-hashtag"></i></div>
+                    <h3>Social Media Management</h3>
+                    <p>Build a consistent and professional social media presence for your business. PubliXo manages your social media content with creative designs, engaging posts, and strategic content planning.</p>
+                    <ul class="service-features">
+                        <li>Facebook</li>
+                        <li>Instagram</li>
+                        <li>Post Designs</li>
+                        <li>Content Planning</li>
+                        <li>Engagement</li>
+                    </ul>
+                    <div class="service-price">
+                        <div class="price-tag">
+                            <span class="price-label">Starting From</span>
+                            <span class="price-value">PKR 13,000 <span class="old-price">15,000</span></span>
+                        </div>
+                        <a href="https://wa.me/923015394177" target="_blank">Get Quote <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+
+                <!-- 8. Digital Marketing -->
+                <div class="service-card fade-up">
+                    <div class="service-icon gold"><i class="fas fa-chart-line"></i></div>
+                    <h3>Digital Marketing</h3>
+                    <p>Grow your business online with a complete digital marketing strategy. We combine web development, social media, advertising, and creative solutions to help your brand reach the right audience.</p>
+                    <ul class="service-features">
+                        <li>Strategy</li>
+                        <li>Social Media</li>
+                        <li>Meta Ads</li>
+                        <li>Lead Generation</li>
+                        <li>Brand Promotion</li>
+                    </ul>
+                    <div class="service-price">
+                        <div class="price-tag">
+                            <span class="price-label">Starting From</span>
+                            <span class="price-value">PKR 14,000 <span class="old-price">15,000</span></span>
+                        </div>
+                        <a href="https://wa.me/923015394177" target="_blank">Get Quote <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+
+                <!-- 9. Website Maintenance & Support -->
+                <div class="service-card fade-up">
+                    <div class="service-icon blue-gold"><i class="fas fa-shield-halved"></i></div>
+                    <h3>Website Maintenance & Support</h3>
+                    <p>Keep your website secure, updated, fast, and running smoothly with professional WordPress maintenance and support from PubliXo.</p>
+                    <ul class="service-features">
+                        <li>Updates</li>
+                        <li>Backup</li>
+                        <li>Security Checks</li>
+                        <li>Error Fixing</li>
+                        <li>Monitoring</li>
+                    </ul>
+                    <div class="service-price">
+                        <div class="price-tag">
+                            <span class="price-label">Starting From</span>
+                            <span class="price-value">PKR 14,000 <span class="old-price">15,000</span></span>
+                        </div>
+                        <a href="https://wa.me/923015394177" target="_blank">Get Quote <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+
+                <!-- 10. Creative Design Services -->
+                <div class="service-card fade-up">
+                    <div class="service-icon gold-blue"><i class="fas fa-palette"></i></div>
+                    <h3>Creative Design Services</h3>
+                    <p>Make your brand stand out with professional and engaging digital designs created for your business and social media presence.</p>
+                    <ul class="service-features">
+                        <li>Social Posts</li>
+                        <li>Promotional</li>
+                        <li>Ad Creatives</li>
+                        <li>Banners</li>
+                        <li>Marketing Materials</li>
+                    </ul>
+                    <div class="service-price">
+                        <div class="price-tag">
+                            <span class="price-label">Starting From</span>
+                            <span class="price-value">PKR 6,000 <span class="old-price">7,000</span></span>
+                        </div>
+                        <a href="https://wa.me/923015394177" target="_blank">Get Quote <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+
+                <!-- 11. Dynamic QR Code Service (NEW) -->
+                <div class="service-card fade-up featured">
+                    <div class="service-badge-new">New</div>
+                    <div class="service-icon gold"><i class="fas fa-qrcode"></i></div>
+                    <h3>Dynamic QR Code Service</h3>
+                    <p>Get a smart QR code that never expires — same QR code, but you can change the content anytime. Perfect for menus, business cards, promotions, and marketing materials.</p>
+                    <ul class="service-features">
+                        <li>Same QR Code</li>
+                        <li>Editable Content</li>
+                        <li>Monthly Updates</li>
+                        <li>Scan Analytics</li>
+                        <li>Custom Design</li>
+                    </ul>
+                    <div class="service-price">
+                        <div class="price-tag">
+                            <span class="price-label">Starting From</span>
+                            <span class="price-value">PKR 1,000<span style="font-size: 0.75rem; color: var(--gray-dark); font-weight: 500; margin-left: 4px;">/month</span></span>
+                        </div>
+                        <a href="https://wa.me/923015394177" target="_blank">Get Quote <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== CATEGORIES ===== -->
+    <section class="section categories-section" id="categories">
+        <div class="section-container">
+            <div class="section-header fade-up">
+                <div class="section-label">Catalog Categories</div>
+                <h2 class="section-title">Browse by <span class="gold">Category</span></h2>
+                <p class="section-subtitle">
+                    Our services are organized into three main categories to help you find exactly what your business needs.
+                </p>
+            </div>
+
+            <div class="categories-grid">
+                <div class="category-card web fade-up">
+                    <div class="category-icon"><i class="fas fa-laptop-code"></i></div>
+                    <h3>Web Development</h3>
+                    <ul>
+                        <li><i class="fas fa-circle"></i> WordPress Website Development</li>
+                        <li><i class="fas fa-circle"></i> Custom Web Development</li>
+                        <li><i class="fas fa-circle"></i> E-Commerce Development</li>
+                        <li><i class="fas fa-circle"></i> WordPress Redesign</li>
+                        <li><i class="fas fa-circle"></i> Website Speed Optimization</li>
+                        <li><i class="fas fa-circle"></i> Website Maintenance</li>
+                        <li><i class="fas fa-circle"></i> Dynamic QR Code Service</li>
+                    </ul>
+                </div>
+
+                <div class="category-card marketing fade-up">
+                    <div class="category-icon"><i class="fas fa-bullhorn"></i></div>
+                    <h3>Digital Marketing</h3>
+                    <ul>
+                        <li><i class="fas fa-circle"></i> Meta Ads Management</li>
+                        <li><i class="fas fa-circle"></i> Social Media Management</li>
+                        <li><i class="fas fa-circle"></i> Digital Marketing</li>
+                    </ul>
+                </div>
+
+                <div class="category-card creative fade-up">
+                    <div class="category-icon"><i class="fas fa-palette"></i></div>
+                    <h3>Creative Services</h3>
+                    <ul>
+                        <li><i class="fas fa-circle"></i> Social Media Designs</li>
+                        <li><i class="fas fa-circle"></i> Ad Creatives</li>
+                        <li><i class="fas fa-circle"></i> Business Graphics</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== CTA ===== -->
+    <section class="section cta-section" id="contact">
+        <div class="section-container">
+            <div class="cta-content fade-up">
+                <div class="cta-logo-wrap">
+                    <div class="cta-logo-inner">
+                        <img src="logo.jpg" alt="PubliXo Logo">
+                    </div>
+                </div>
+                <h2>Ready to <span class="gold">Grow Your Business</span> Online?</h2>
+                <p>
+                    Get in touch with PubliXo for professional Web Development, WordPress Development, Meta Ads, Social Media Management, and Digital Marketing solutions.
+                </p>
+                <div class="cta-buttons">
+                    <a href="https://wa.me/923015394177" class="btn btn-whatsapp" target="_blank">
+                        <i class="fab fa-whatsapp"></i> WhatsApp Now
+                    </a>
+                    <a href="tel:+923015394177" class="btn btn-outline-gold">
+                        <i class="fas fa-phone"></i> Call Us
+                    </a>
+                </div>
+                <div class="cta-contact-info">
+                    <i class="fab fa-whatsapp"></i>
+                    <span>Call / WhatsApp: <strong>0301 5394177</strong></span>
+                </div>
+                <p class="cta-tagline">
+                    Publi<span class="blue">X</span><span class="gold">o</span> — Publishing & Beyond<br>
+                    <span style="color: #475569;">Your Vision. Our Development.</span>
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <a href="#" class="logo">
+                        <img src="logo.jpg" alt="PubliXo Logo" class="logo-img">
+                        <span class="logo-text">Publi<span class="blue">X</span><span class="gold">o</span></span>
+                    </a>
+                    <p>
+                        Professional Web Development, WordPress solutions, Meta Ads, Social Media Management, and Digital Marketing services designed to help your business grow online.
+                    </p>
+                </div>
+                <div>
+                    <h4>Web Development</h4>
+                    <ul>
+                        <li><a href="#services">WordPress Development</a></li>
+                        <li><a href="#services">Custom Web Development</a></li>
+                        <li><a href="#services">E-Commerce</a></li>
+                        <li><a href="#services">WordPress Redesign</a></li>
+                        <li><a href="#services">Speed Optimization</a></li>
+                        <li><a href="#services">Dynamic QR Code</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4>Digital Marketing</h4>
+                    <ul>
+                        <li><a href="#services">Meta Ads Management</a></li>
+                        <li><a href="#services">Social Media Management</a></li>
+                        <li><a href="#services">Digital Marketing</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4>Creative Services</h4>
+                    <ul>
+                        <li><a href="#services">Social Media Designs</a></li>
+                        <li><a href="#services">Ad Creatives</a></li>
+                        <li><a href="#services">Business Graphics</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 PubliXo. All rights reserved.</p>
+                <span class="tagline">Your Vision. Our Development.</span>
+                <div class="footer-social">
+                    <a href="https://wa.me/923015394177" target="_blank" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                    <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ===== SCRIPTS ===== -->
+    <script>
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            navbar.classList.toggle('scrolled', window.scrollY > 20);
+        });
+
+        const mobileToggle = document.getElementById('mobileToggle');
+        const navLinks = document.getElementById('navLinks');
+        mobileToggle.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+            const icon = mobileToggle.querySelector('i');
+            icon.classList.toggle('fa-bars');
+            icon.classList.toggle('fa-times');
+        });
+
+        navLinks.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                navLinks.classList.remove('active');
+                const icon = mobileToggle.querySelector('i');
+                icon.classList.add('fa-bars');
+                icon.classList.remove('fa-times');
+            });
+        });
+
+        const observerOptions = { threshold: 0.1, rootMargin: '0px 0px -50px 0px' };
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+    </script>
+</body>
+</html>
