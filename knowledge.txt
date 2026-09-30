@@ -1,51 +1,73 @@
-Business: PubliXo (tagline: Publishing & Beyond, "Your Vision. Our Development.")
-About: Web development aur digital marketing agency. Modern, responsive aur performance-driven solutions.
-Contact: WhatsApp / Call: 0341 5104761 (https://wa.me/923415104761)
-Pricing: Har project ki price requirements ke hisaab se hoti hai. Exact quote ke liye WhatsApp/call karein: 0341 5104761.
+BUSINESS: PubliXo
+Tagline: Publishing & Beyond. Slogan: Your Vision. Our Development.
+About: PubliXo provides professional Web Development, WordPress Development, Meta Ads, Social Media Management, Digital Marketing, Creative Design and Dynamic QR Code services. Modern, responsive and performance-driven solutions tailored to business goals.
 
-SERVICES:
+CONTACT:
+Call / WhatsApp: 0301 5394177
+WhatsApp link: https://wa.me/923015394177
+
+PRICING (all prices in PKR, "Starting From" prices; final price depends on project requirements; exact quote on WhatsApp/call 0301 5394177):
+1. WordPress Website Development: starting from PKR 6,000 (discounted from 7,000)
+2. Custom Web Development: starting from PKR 18,000 (discounted from 20,000)
+3. E-Commerce Website Development: starting from PKR 45,000 (discounted from 50,000)
+4. WordPress Website Redesign: starting from PKR 8,000 (discounted from 10,000)
+5. Website Speed Optimization: starting from PKR 7,000 (discounted from 8,000)
+6. Meta Ads Management: starting from PKR 6,000 (discounted from 7,000)
+7. Social Media Management: starting from PKR 13,000 (discounted from 15,000)
+8. Digital Marketing: starting from PKR 14,000 (discounted from 15,000)
+9. Website Maintenance & Support: starting from PKR 14,000 (discounted from 15,000)
+10. Creative Design Services: starting from PKR 6,000 (discounted from 7,000)
+11. Dynamic QR Code Service: starting from PKR 1,000 per month
+
+NOT AVAILABLE (do not guess, refer to contact number): office address, email, working hours, portfolio, delivery timelines, payment methods, extra discounts, package details beyond what is listed here.
+
+SERVICES (11 total):
 
 1. WordPress Website Development
-Professional, modern, responsive WordPress website. Clean layouts, mobile responsive, SEO-friendly structure, performance optimization.
+Professional, modern, responsive WordPress website designed for your business. User-friendly, clean layouts, mobile responsiveness, SEO-friendly structure and performance optimization.
 Includes: Business Website, Elementor, Responsive, SEO Setup, Speed Optimization.
 
 2. Custom Web Development
-Business requirements ke mutabiq custom website. Performance, usability aur professional presentation par focus.
+Powerful website tailored to business requirements. Modern, responsive and functional websites focused on performance, usability and professional presentation.
 Includes: Custom Development, Responsive Design, Custom Features, Performance, Maintenance.
 
 3. E-Commerce Website Development
-Online store jahan products show, orders manage aur smooth shopping experience mile.
+Online store to showcase products, manage orders and give customers a smooth shopping experience.
 Includes: WooCommerce, Shopping Cart, Payment Integration, Product Setup, Store Optimization.
 
 4. WordPress Website Redesign
-Purani ya kamzor WordPress site ko modern design, behtar UX, responsive layout aur behtar performance dena.
+For outdated or poorly designed WordPress websites: modern design, improved user experience, responsive layouts and better performance.
 Includes: Modern UI/UX, Elementor, Mobile Optimization, Speed Improvements, Content Layout.
 
 5. Website Speed Optimization
-WordPress site ki loading speed aur performance behtar karna.
+Improves loading speed and performance of WordPress websites. Identifies performance issues and optimizes for a faster, smoother experience.
 Includes: Image Optimization, Cache Configuration, CSS & JS, Database, Mobile Performance.
 
 6. Meta Ads Management
-Facebook aur Instagram par targeted ad campaigns (reach, traffic, leads, messages, sales).
+Targeted Facebook and Instagram advertising campaigns to increase reach, traffic, leads, messages and sales.
 Includes: Facebook Ads, Instagram Ads, Audience Targeting, Lead Generation, Performance.
 
 7. Social Media Management
-Facebook/Instagram par consistent professional presence: creative designs, engaging posts, content planning.
+Consistent, professional social media presence with creative designs, engaging posts and strategic content planning.
 Includes: Facebook, Instagram, Post Designs, Content Planning, Engagement.
 
 8. Digital Marketing
-Complete strategy: web development, social media, advertising aur creative solutions.
+Complete digital marketing strategy combining web development, social media, advertising and creative solutions to reach the right audience.
 Includes: Strategy, Social Media, Meta Ads, Lead Generation, Brand Promotion.
 
 9. Website Maintenance & Support
-WordPress site secure, updated, fast aur smooth rakhna.
+Professional WordPress maintenance to keep a website secure, updated, fast and running smoothly.
 Includes: Updates, Backup, Security Checks, Error Fixing, Monitoring.
 
 10. Creative Design Services
-Business aur social media ke liye professional digital designs.
+Professional, engaging digital designs for business and social media presence.
 Includes: Social Posts, Promotional, Ad Creatives, Banners, Marketing Materials.
 
+11. Dynamic QR Code Service (NEW)
+A smart QR code that never expires. Same QR code, but the content can be changed anytime. Good for menus, business cards, promotions and marketing materials.
+Includes: Same QR Code, Editable Content, Monthly Updates, Scan Analytics, Custom Design.
+
 CATEGORIES:
-- Web Development: WordPress Development, Custom Web Development, E-Commerce, WordPress Redesign, Speed Optimization, Website Maintenance
+- Web Development: WordPress Website Development, Custom Web Development, E-Commerce Development, WordPress Redesign, Website Speed Optimization, Website Maintenance, Dynamic QR Code Service
 - Digital Marketing: Meta Ads Management, Social Media Management, Digital Marketing
 - Creative Services: Social Media Designs, Ad Creatives, Business Graphics
