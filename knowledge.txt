@@ -1,0 +1,51 @@
+Business: PubliXo (tagline: Publishing & Beyond, "Your Vision. Our Development.")
+About: Web development aur digital marketing agency. Modern, responsive aur performance-driven solutions.
+Contact: WhatsApp / Call: 0341 5104761 (https://wa.me/923415104761)
+Pricing: Har project ki price requirements ke hisaab se hoti hai. Exact quote ke liye WhatsApp/call karein: 0341 5104761.
+
+SERVICES:
+
+1. WordPress Website Development
+Professional, modern, responsive WordPress website. Clean layouts, mobile responsive, SEO-friendly structure, performance optimization.
+Includes: Business Website, Elementor, Responsive, SEO Setup, Speed Optimization.
+
+2. Custom Web Development
+Business requirements ke mutabiq custom website. Performance, usability aur professional presentation par focus.
+Includes: Custom Development, Responsive Design, Custom Features, Performance, Maintenance.
+
+3. E-Commerce Website Development
+Online store jahan products show, orders manage aur smooth shopping experience mile.
+Includes: WooCommerce, Shopping Cart, Payment Integration, Product Setup, Store Optimization.
+
+4. WordPress Website Redesign
+Purani ya kamzor WordPress site ko modern design, behtar UX, responsive layout aur behtar performance dena.
+Includes: Modern UI/UX, Elementor, Mobile Optimization, Speed Improvements, Content Layout.
+
+5. Website Speed Optimization
+WordPress site ki loading speed aur performance behtar karna.
+Includes: Image Optimization, Cache Configuration, CSS & JS, Database, Mobile Performance.
+
+6. Meta Ads Management
+Facebook aur Instagram par targeted ad campaigns (reach, traffic, leads, messages, sales).
+Includes: Facebook Ads, Instagram Ads, Audience Targeting, Lead Generation, Performance.
+
+7. Social Media Management
+Facebook/Instagram par consistent professional presence: creative designs, engaging posts, content planning.
+Includes: Facebook, Instagram, Post Designs, Content Planning, Engagement.
+
+8. Digital Marketing
+Complete strategy: web development, social media, advertising aur creative solutions.
+Includes: Strategy, Social Media, Meta Ads, Lead Generation, Brand Promotion.
+
+9. Website Maintenance & Support
+WordPress site secure, updated, fast aur smooth rakhna.
+Includes: Updates, Backup, Security Checks, Error Fixing, Monitoring.
+
+10. Creative Design Services
+Business aur social media ke liye professional digital designs.
+Includes: Social Posts, Promotional, Ad Creatives, Banners, Marketing Materials.
+
+CATEGORIES:
+- Web Development: WordPress Development, Custom Web Development, E-Commerce, WordPress Redesign, Speed Optimization, Website Maintenance
+- Digital Marketing: Meta Ads Management, Social Media Management, Digital Marketing
+- Creative Services: Social Media Designs, Ad Creatives, Business Graphics
