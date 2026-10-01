@@ -1,6 +1,8 @@
-<!-- ===== PubliXo AI Chat Widget — English, Live Voice (paste before </body> in index.html) ===== -->
-<!-- Remove any older widget first. Text comes from the AI, voice from the browser (British English). -->
-<style>
+/* ===== PubliXo AI Chat Widget — English, Live Voice ===== */
+(function () {
+  // ========== 1. CSS INJECT ==========
+  const style = document.createElement('style');
+  style.innerHTML = `
   #pxBtn{position:fixed;right:20px;bottom:20px;width:60px;height:60px;border-radius:50%;border:none;cursor:pointer;z-index:2000;
     background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#0a0f1e;font-size:26px;box-shadow:0 6px 24px rgba(245,158,11,.5)}
   #pxBox{position:fixed;right:20px;bottom:92px;width:360px;max-width:calc(100vw - 24px);height:560px;max-height:calc(100vh - 120px);
@@ -27,31 +29,35 @@
   #pxSend{background:linear-gradient(135deg,#f59e0b,#fbbf24)!important;color:#0a0f1e!important}
   #pxMic.on{background:#ef4444!important;color:#fff!important;animation:pxp 1s infinite}
   @keyframes pxp{50%{opacity:.6}}
-</style>
+  `;
+  document.head.appendChild(style);
 
-<button id="pxBtn" aria-label="Chat with PubliXo">💬</button>
-<div id="pxBox">
-  <div id="pxHead">
-    <div>PubliXo Assistant<small id="pxStatus">Ask by text or voice</small></div>
-    <div><button id="pxClose" title="Close">✕</button></div>
+  // ========== 2. HTML INJECT ==========
+  const widgetHTML = `
+  <button id="pxBtn" aria-label="Chat with PubliXo">💬</button>
+  <div id="pxBox">
+    <div id="pxHead">
+      <div>PubliXo Assistant<small id="pxStatus">Ask by text or voice</small></div>
+      <div><button id="pxClose" title="Close">✕</button></div>
+    </div>
+    <div id="pxMsgs"></div>
+    <div id="pxOpts">
+      <select id="pxGender" title="Voice">
+        <option value="female">👩 Female voice</option>
+        <option value="male">👨 Male voice</option>
+      </select>
+      <button id="pxLive" title="Hands-free live conversation">📞 Live Chat</button>
+    </div>
+    <div id="pxBar">
+      <button id="pxMic" title="Tap and speak once">🎤</button>
+      <input id="pxIn" type="text" placeholder="Type your question..." maxlength="500" />
+      <button id="pxSend" title="Send">➤</button>
+    </div>
   </div>
-  <div id="pxMsgs"></div>
-  <div id="pxOpts">
-    <select id="pxGender" title="Voice">
-      <option value="female">👩 Female voice</option>
-      <option value="male">👨 Male voice</option>
-    </select>
-    <button id="pxLive" title="Hands-free live conversation">📞 Live Chat</button>
-  </div>
-  <div id="pxBar">
-    <button id="pxMic" title="Tap and speak once">🎤</button>
-    <input id="pxIn" type="text" placeholder="Type your question..." maxlength="500" />
-    <button id="pxSend" title="Send">➤</button>
-  </div>
-</div>
+  `;
+  document.body.insertAdjacentHTML('beforeend', widgetHTML);
 
-<script>
-(() => {
+  // ========== 3. JAVASCRIPT LOGIC ==========
   const API = "https://wa-bot.naseersatti0301.workers.dev/chat";
   const IDLE = "Ask by text or voice";
   const $ = (id) => document.getElementById(id);
@@ -59,8 +65,8 @@
         liveBtn = $("pxLive"), statusEl = $("pxStatus");
   const synth = window.speechSynthesis;
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  const LISTEN_LANG = "en-IN";   // understands Indian/Pakistani English best
-  const SPEAK_LANG = "en-GB";    // British English voice
+  const LISTEN_LANG = "en-IN";
+  const SPEAK_LANG = "en-GB";
 
   let history = [], busy = false, speaking = false, live = false, rec = null, usedVoice = false, interimEl = null, speakToken = 0;
 
@@ -76,7 +82,7 @@
 
   add("Hello! 👋 Welcome to PubliXo. Ask me about websites, Meta Ads, social media or QR codes. You can type, or tap 📞 Live Chat and just talk to me.", "bot");
 
-  /* ---------- Voice: browser British English (female / male) ---------- */
+  /* ---------- Voice ---------- */
   const FEMALE = /sonia|libby|maisie|hazel|susan|kate|serena|martha|stephanie|female|woman|girl|samantha|zira/i;
   const MALE = /ryan|thomas|george|daniel|oliver|arthur|alfie|male|man|boy|david|mark|guy/i;
 
@@ -188,7 +194,7 @@
       mic.classList.remove("on");
       if (interimEl) { interimEl.remove(); interimEl = null; }
       if (finalText.trim()) { usedVoice = true; send(finalText); }
-      else if (live) setTimeout(startListen, 250);   // silence: keep listening
+      else if (live) setTimeout(startListen, 250);
     };
     try { r.start(); } catch (e) { rec = null; setTimeout(startListen, 500); }
   }
@@ -253,7 +259,7 @@
   $("pxSend").onclick = () => send(input.value);
   input.addEventListener("keydown", (e) => { if (e.key === "Enter") send(input.value); });
 
-  /* ---------- Single-shot mic (outside live mode) ---------- */
+  /* ---------- Single-shot mic ---------- */
   if (!SR) {
     mic.style.display = "none";
     liveBtn.style.display = "none";
@@ -281,4 +287,3 @@
   if (synth) { synth.getVoices(); synth.onvoiceschanged = () => synth.getVoices(); }
   window.addEventListener("beforeunload", () => { stopSpeaking(); });
 })();
-</script>
