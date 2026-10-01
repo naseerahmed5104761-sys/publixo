@@ -1521,6 +1521,13 @@
     </script>
 
     <!-- ===== PubliXo AI Chat Widget (index.html mein </body> se pehle paste karo) ===== -->
-<script src="chat-widget-live.html"></script>
+<script>
+    fetch('chat-widget-live.html')
+        .then(response => response.text())
+        .then(html => {
+            document.body.insertAdjacentHTML('beforeend', html);
+        })
+        .catch(error => console.error('Widget load error:', error));
+</script>
 </body>
 </html>
