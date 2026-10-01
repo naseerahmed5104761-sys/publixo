@@ -1519,5 +1519,137 @@
 
         document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
     </script>
+
+    <!-- ===== PubliXo AI Chat Widget (index.html mein </body> se pehle paste karo) ===== -->
+<style>
+  #pxBtn{position:fixed;right:20px;bottom:20px;width:60px;height:60px;border-radius:50%;border:none;cursor:pointer;z-index:2000;
+    background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#0a0f1e;font-size:26px;box-shadow:0 6px 24px rgba(245,158,11,.5)}
+  #pxBox{position:fixed;right:20px;bottom:92px;width:360px;max-width:calc(100vw - 24px);height:520px;max-height:calc(100vh - 120px);
+    background:#0a0f1e;border:1px solid rgba(245,158,11,.35);border-radius:18px;display:none;flex-direction:column;z-index:2000;
+    box-shadow:0 20px 50px rgba(0,0,0,.6);font-family:Inter,Arial,sans-serif;overflow:hidden}
+  #pxBox.open{display:flex}
+  #pxHead{padding:14px 16px;background:linear-gradient(135deg,#1a2332,#0a0f1e);border-bottom:1px solid rgba(245,158,11,.25);
+    display:flex;align-items:center;justify-content:space-between;color:#fff;font-weight:700}
+  #pxHead small{display:block;color:#94a3b8;font-weight:400;font-size:11px}
+  #pxHead button{background:none;border:none;color:#fbbf24;font-size:18px;cursor:pointer;margin-left:8px}
+  #pxMsgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
+  .pxm{max-width:82%;padding:10px 13px;border-radius:14px;font-size:14px;line-height:1.5;white-space:pre-wrap;word-wrap:break-word}
+  .pxm.bot{background:#1a2332;color:#e2e8f0;align-self:flex-start;border-bottom-left-radius:4px}
+  .pxm.me{background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#0a0f1e;align-self:flex-end;border-bottom-right-radius:4px}
+  #pxBar{display:flex;gap:6px;padding:10px;border-top:1px solid rgba(245,158,11,.2);background:#111827;align-items:center}
+  #pxIn{flex:1;background:#0a0f1e;border:1px solid rgba(245,158,11,.25);border-radius:22px;padding:10px 14px;color:#fff;font-size:14px;outline:none;min-width:0}
+  #pxBar button{width:38px;height:38px;border-radius:50%;border:none;cursor:pointer;font-size:16px;flex-shrink:0;background:#1a2332;color:#fbbf24}
+  #pxSend{background:linear-gradient(135deg,#f59e0b,#fbbf24)!important;color:#0a0f1e!important}
+  #pxMic.on{background:#ef4444!important;color:#fff!important;animation:pxp 1s infinite}
+  @keyframes pxp{50%{opacity:.55}}
+  #pxLang{background:#1a2332;color:#fbbf24;border:none;border-radius:8px;font-size:12px;padding:6px 4px;cursor:pointer}
+</style>
+
+<button id="pxBtn" aria-label="Chat with PubliXo">💬</button>
+<div id="pxBox">
+  <div id="pxHead">
+    <div>PubliXo Assistant<small>Text ya voice mein poochhein</small></div>
+    <div><button id="pxSpeak" title="Voice reply on/off">🔊</button><button id="pxClose">✕</button></div>
+  </div>
+  <div id="pxMsgs"></div>
+  <div id="pxBar">
+    <select id="pxLang" title="Voice language">
+      <option value="ur-PK">اردو</option>
+      <option value="en-US">English</option>
+    </select>
+    <button id="pxMic" title="Bol kar poochhein">🎤</button>
+    <input id="pxIn" type="text" placeholder="Apna sawal likhein..." maxlength="500" />
+    <button id="pxSend" title="Send">➤</button>
+  </div>
+</div>
+
+<script>
+(() => {
+  const API = "https://wa-bot.naseersatti0301.workers.dev/chat";
+  const $ = (id) => document.getElementById(id);
+  const box = $("pxBox"), msgs = $("pxMsgs"), input = $("pxIn"), mic = $("pxMic");
+  let history = [], busy = false, speakOn = true, usedVoice = false;
+
+  function add(text, who) {
+    const d = document.createElement("div");
+    d.className = "pxm " + who;
+    d.textContent = text;
+    msgs.appendChild(d);
+    msgs.scrollTop = msgs.scrollHeight;
+    return d;
+  }
+
+  add("Assalam o Alaikum! 👋 PubliXo mein khush aamdeed. Websites, Meta Ads, social media ya QR code ke baare mein poochhein. Aap likh bhi sakte hain aur 🎤 se bol bhi sakte hain.", "bot");
+
+  $("pxBtn").onclick = () => { box.classList.toggle("open"); if (box.classList.contains("open")) input.focus(); };
+  $("pxClose").onclick = () => { box.classList.remove("open"); speechSynthesis && speechSynthesis.cancel(); };
+  $("pxSpeak").onclick = (e) => {
+    speakOn = !speakOn;
+    e.target.textContent = speakOn ? "🔊" : "🔇";
+    if (!speakOn && window.speechSynthesis) speechSynthesis.cancel();
+  };
+
+  function speak(text) {
+    if (!speakOn || !window.speechSynthesis) return;
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    const urdu = /[\u0600-\u06FF]/.test(text);
+    u.lang = urdu ? "ur-PK" : "en-US";
+    const v = speechSynthesis.getVoices().find((x) => x.lang.toLowerCase().startsWith(u.lang.slice(0, 2).toLowerCase()));
+    if (v) u.voice = v;
+    speechSynthesis.speak(u);
+  }
+
+  async function send(text) {
+    text = (text || "").trim();
+    if (!text || busy) return;
+    busy = true;
+    add(text, "me");
+    input.value = "";
+    const wait = add("...", "bot");
+    try {
+      const r = await fetch(API, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: text, history: history.slice(-8) }),
+      });
+      const data = await r.json();
+      if (!r.ok || !data.reply) throw new Error("bad");
+      wait.textContent = data.reply;
+      history.push({ role: "user", content: text }, { role: "assistant", content: data.reply });
+      if (usedVoice) speak(data.reply);
+    } catch (e) {
+      wait.textContent = "Maazrat, abhi jawab nahi de saka. Aap 0301 5394177 par call/WhatsApp kar sakte hain.";
+    }
+    usedVoice = false;
+    busy = false;
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  $("pxSend").onclick = () => send(input.value);
+  input.addEventListener("keydown", (e) => { if (e.key === "Enter") send(input.value); });
+
+  // Voice input (Chrome/Edge/Android; Firefox mein support nahi)
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) {
+    mic.style.display = "none";
+    $("pxLang").style.display = "none";
+  } else {
+    let rec = null;
+    mic.onclick = () => {
+      if (rec) { rec.stop(); return; }
+      rec = new SR();
+      rec.lang = $("pxLang").value;
+      rec.interimResults = false;
+      rec.onstart = () => mic.classList.add("on");
+      rec.onend = () => { mic.classList.remove("on"); rec = null; };
+      rec.onerror = () => { mic.classList.remove("on"); rec = null; };
+      rec.onresult = (e) => { usedVoice = true; send(e.results[0][0].transcript); };
+      rec.start();
+    };
+  }
+  if (window.speechSynthesis) speechSynthesis.getVoices();
+})();
+</script>
 </body>
 </html>
