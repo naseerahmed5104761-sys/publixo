@@ -1521,10 +1521,12 @@
     </script>
 
     <!-- ===== PubliXo AI Chat Widget (index.html mein </body> se pehle paste karo) ===== -->
+<!-- ===== PubliXo AI Chat Widget + LIVE VOICE (index.html mein </body> se pehle paste karo) ===== -->
+<!-- Purana widget (chat-widget.html) hata kar sirf ye lagao -->
 <style>
   #pxBtn{position:fixed;right:20px;bottom:20px;width:60px;height:60px;border-radius:50%;border:none;cursor:pointer;z-index:2000;
     background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#0a0f1e;font-size:26px;box-shadow:0 6px 24px rgba(245,158,11,.5)}
-  #pxBox{position:fixed;right:20px;bottom:92px;width:360px;max-width:calc(100vw - 24px);height:520px;max-height:calc(100vh - 120px);
+  #pxBox{position:fixed;right:20px;bottom:92px;width:360px;max-width:calc(100vw - 24px);height:560px;max-height:calc(100vh - 120px);
     background:#0a0f1e;border:1px solid rgba(245,158,11,.35);border-radius:18px;display:none;flex-direction:column;z-index:2000;
     box-shadow:0 20px 50px rgba(0,0,0,.6);font-family:Inter,Arial,sans-serif;overflow:hidden}
   #pxBox.open{display:flex}
@@ -1536,28 +1538,40 @@
   .pxm{max-width:82%;padding:10px 13px;border-radius:14px;font-size:14px;line-height:1.5;white-space:pre-wrap;word-wrap:break-word}
   .pxm.bot{background:#1a2332;color:#e2e8f0;align-self:flex-start;border-bottom-left-radius:4px}
   .pxm.me{background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#0a0f1e;align-self:flex-end;border-bottom-right-radius:4px}
+  .pxm.interim{opacity:.55;font-style:italic}
+  #pxOpts{display:flex;gap:6px;padding:8px 10px;background:#111827;border-top:1px solid rgba(245,158,11,.2);align-items:center}
+  #pxOpts select{background:#1a2332;color:#fbbf24;border:none;border-radius:8px;font-size:12px;padding:7px 4px;cursor:pointer;min-width:0;flex:1}
+  #pxLive{flex:0 0 auto;border:none;border-radius:20px;padding:8px 12px;font-size:13px;font-weight:700;cursor:pointer;
+    background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;white-space:nowrap}
+  #pxLive.on{background:linear-gradient(135deg,#ef4444,#dc2626);animation:pxp 1.4s infinite}
   #pxBar{display:flex;gap:6px;padding:10px;border-top:1px solid rgba(245,158,11,.2);background:#111827;align-items:center}
   #pxIn{flex:1;background:#0a0f1e;border:1px solid rgba(245,158,11,.25);border-radius:22px;padding:10px 14px;color:#fff;font-size:14px;outline:none;min-width:0}
   #pxBar button{width:38px;height:38px;border-radius:50%;border:none;cursor:pointer;font-size:16px;flex-shrink:0;background:#1a2332;color:#fbbf24}
   #pxSend{background:linear-gradient(135deg,#f59e0b,#fbbf24)!important;color:#0a0f1e!important}
   #pxMic.on{background:#ef4444!important;color:#fff!important;animation:pxp 1s infinite}
-  @keyframes pxp{50%{opacity:.55}}
-  #pxLang{background:#1a2332;color:#fbbf24;border:none;border-radius:8px;font-size:12px;padding:6px 4px;cursor:pointer}
+  @keyframes pxp{50%{opacity:.6}}
 </style>
 
 <button id="pxBtn" aria-label="Chat with PubliXo">💬</button>
 <div id="pxBox">
   <div id="pxHead">
-    <div>PubliXo Assistant<small>Text ya voice mein poochhein</small></div>
-    <div><button id="pxSpeak" title="Voice reply on/off">🔊</button><button id="pxClose">✕</button></div>
+    <div>PubliXo Assistant<small id="pxStatus">Text ya voice mein poochhein</small></div>
+    <div><button id="pxClose" title="Band karein">✕</button></div>
   </div>
   <div id="pxMsgs"></div>
-  <div id="pxBar">
-    <select id="pxLang" title="Voice language">
-      <option value="ur-PK">اردو</option>
-      <option value="en-US">English</option>
+  <div id="pxOpts">
+    <select id="pxGender" title="Awaaz">
+      <option value="female">👩 Larki ki awaaz</option>
+      <option value="male">👨 Larke ki awaaz</option>
     </select>
-    <button id="pxMic" title="Bol kar poochhein">🎤</button>
+    <select id="pxLang" title="Aap kis zubaan mein bolenge">
+      <option value="en-IN">English (India)</option>
+      <option value="ur-PK">اردو</option>
+    </select>
+    <button id="pxLive" title="Hands-free live baat">📞 Live Baat</button>
+  </div>
+  <div id="pxBar">
+    <button id="pxMic" title="Ek baar bol kar poochhein">🎤</button>
     <input id="pxIn" type="text" placeholder="Apna sawal likhein..." maxlength="500" />
     <button id="pxSend" title="Send">➤</button>
   </div>
@@ -1567,9 +1581,14 @@
 (() => {
   const API = "https://wa-bot.naseersatti0301.workers.dev/chat";
   const $ = (id) => document.getElementById(id);
-  const box = $("pxBox"), msgs = $("pxMsgs"), input = $("pxIn"), mic = $("pxMic");
-  let history = [], busy = false, speakOn = true, usedVoice = false;
+  const box = $("pxBox"), msgs = $("pxMsgs"), input = $("pxIn"), mic = $("pxMic"),
+        liveBtn = $("pxLive"), statusEl = $("pxStatus");
+  const synth = window.speechSynthesis;
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 
+  let history = [], busy = false, speaking = false, live = false, rec = null, usedVoice = false, interimEl = null;
+
+  function setStatus(t) { statusEl.textContent = t; }
   function add(text, who) {
     const d = document.createElement("div");
     d.className = "pxm " + who;
@@ -1579,34 +1598,155 @@
     return d;
   }
 
-  add("Assalam o Alaikum! 👋 PubliXo mein khush aamdeed. Websites, Meta Ads, social media ya QR code ke baare mein poochhein. Aap likh bhi sakte hain aur 🎤 se bol bhi sakte hain.", "bot");
+  add("Assalam o Alaikum! 👋 PubliXo mein khush aamdeed. Websites, Meta Ads, social media ya QR code ke baare mein poochhein. Likh sakte hain, ya 📞 Live Baat dabao aur seedha bolna shuru karein.", "bot");
 
-  $("pxBtn").onclick = () => { box.classList.toggle("open"); if (box.classList.contains("open")) input.focus(); };
-  $("pxClose").onclick = () => { box.classList.remove("open"); speechSynthesis && speechSynthesis.cancel(); };
-  $("pxSpeak").onclick = (e) => {
-    speakOn = !speakOn;
-    e.target.textContent = speakOn ? "🔊" : "🔇";
-    if (!speakOn && window.speechSynthesis) speechSynthesis.cancel();
-  };
+  /* ---------- Voice selection (clear Indian English, girl / boy) ---------- */
+  const FEMALE = /heera|neerja|veena|priya|kalpana|lekha|aditi|raveena|swara|female|woman|girl|\bf\b/i;
+  const MALE = /ravi|prabhat|rishi|hemant|neel|kabir|madhur|male|man|boy/i;
 
-  function speak(text) {
-    if (!speakOn || !window.speechSynthesis) return;
-    speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    const urdu = /[\u0600-\u06FF]/.test(text);
-    u.lang = urdu ? "ur-PK" : "en-US";
-    const v = speechSynthesis.getVoices().find((x) => x.lang.toLowerCase().startsWith(u.lang.slice(0, 2).toLowerCase()));
-    if (v) u.voice = v;
-    speechSynthesis.speak(u);
+  function pickVoice(lang, gender) {
+    const all = synth ? synth.getVoices() : [];
+    const base = lang.slice(0, 2).toLowerCase();
+    const norm = (v) => v.lang.replace("_", "-").toLowerCase();
+    const inLang = (code) => all.filter((v) => norm(v).startsWith(code.toLowerCase()));
+    const want = gender === "female" ? FEMALE : MALE;
+    const other = gender === "female" ? MALE : FEMALE;
+
+    let pools = lang === "ur-PK"
+      ? [inLang("ur"), inLang("hi-in"), inLang("en-in")]
+      : [inLang("en-in"), inLang("hi-in"), inLang("en-gb"), inLang("en")];
+
+    for (const pool of pools) {
+      if (!pool.length) continue;
+      // 1) naam se match (natural/online voices ko pehle)
+      const named = pool.filter((v) => want.test(v.name));
+      if (named.length) return named.sort((a, b) => /natural|online/i.test(b.name) - /natural|online/i.test(a.name))[0];
+      // 2) opposite gender ke naam wali voice na lo
+      const rest = pool.filter((v) => !other.test(v.name));
+      if (rest.length) return rest[0];
+      if (gender === "female") return pool[0];
+    }
+    return null;
   }
 
+  function cleanForSpeech(t) {
+    return t
+      .replace(/https?:\/\/\S+/g, "")
+      .replace(/[*_`#>~]/g, "")
+      .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, "")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  /* ---------- Speaking (chunked, Chrome ke 15-sec cut bug se bachne ke liye) ---------- */
+  function speak(text, done) {
+    text = cleanForSpeech(text);
+    if (!synth || !text) { done && done(); return; }
+    synth.cancel();
+    const gender = $("pxGender").value;
+    const urdu = /[\u0600-\u06FF]/.test(text);
+    const lang = urdu ? "ur-PK" : "en-IN";
+    const voice = pickVoice(lang, gender);
+    const chunks = text.match(/[^.!?۔\n]+[.!?۔]?/g) || [text];
+    speaking = true;
+    stopListen();
+    setStatus("Bol raha hoon... 🔊");
+
+    let i = 0;
+    const finish = () => { if (!speaking) return; speaking = false; done && done(); };
+    const next = () => {
+      if (i >= chunks.length) return finish();
+      const piece = chunks[i++].trim();
+      if (!piece) return next();
+      const u = new SpeechSynthesisUtterance(piece);
+      u.lang = voice ? voice.lang : lang;
+      if (voice) u.voice = voice;
+      u.rate = 0.95;
+      // Agar asli female/male voice na mile to pitch se farq banao
+      u.pitch = voice && (gender === "female" ? FEMALE : MALE).test(voice.name) ? 1 : (gender === "female" ? 1.25 : 0.8);
+      u.onend = next;
+      u.onerror = next;
+      synth.speak(u);
+    };
+    next();
+  }
+  function stopSpeaking() { speaking = false; synth && synth.cancel(); }
+
+  /* ---------- Listening ---------- */
+  function stopListen() {
+    if (rec) { const r = rec; rec = null; r.onend = null; r.onerror = null; try { r.abort(); } catch (e) {} }
+    mic.classList.remove("on");
+    if (interimEl) { interimEl.remove(); interimEl = null; }
+  }
+
+  function startListen() {
+    if (!SR || !live || speaking || busy || rec) return;
+    const r = new SR();
+    rec = r;
+    r.lang = $("pxLang").value;
+    r.continuous = false;
+    r.interimResults = true;
+    let finalText = "";
+    r.onstart = () => { mic.classList.add("on"); setStatus("Sun raha hoon... 🎤 boliye"); };
+    r.onresult = (e) => {
+      let interim = "";
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        const t = e.results[i][0].transcript;
+        if (e.results[i].isFinal) finalText += t; else interim += t;
+      }
+      if (interim) {
+        if (!interimEl) interimEl = add("", "me interim");
+        interimEl.textContent = interim;
+        msgs.scrollTop = msgs.scrollHeight;
+      }
+    };
+    r.onerror = (e) => {
+      if (e.error === "not-allowed" || e.error === "service-not-allowed") {
+        stopLive();
+        add("Mic ki permission band hai. Browser ke address bar mein 🔒 dabao aur Microphone allow karo.", "bot");
+      }
+    };
+    r.onend = () => {
+      if (rec !== r) return;
+      rec = null;
+      mic.classList.remove("on");
+      if (interimEl) { interimEl.remove(); interimEl = null; }
+      if (finalText.trim()) { usedVoice = true; send(finalText); }
+      else if (live) setTimeout(startListen, 250);   // khamoshi: dobara sunna shuru
+    };
+    try { r.start(); } catch (e) { rec = null; setTimeout(startListen, 500); }
+  }
+
+  /* ---------- Live mode ---------- */
+  function startLive() {
+    if (!SR) { add("Aap ke browser mein voice support nahi hai. Chrome ya Edge use karein.", "bot"); return; }
+    live = true;
+    liveBtn.classList.add("on");
+    liveBtn.textContent = "⏹ Band karo";
+    setStatus("Live baat shuru...");
+    startListen();
+  }
+  function stopLive() {
+    live = false;
+    stopListen();
+    stopSpeaking();
+    liveBtn.classList.remove("on");
+    liveBtn.textContent = "📞 Live Baat";
+    setStatus("Text ya voice mein poochhein");
+  }
+  liveBtn.onclick = () => (live ? stopLive() : startLive());
+
+  /* ---------- Chat ---------- */
   async function send(text) {
     text = (text || "").trim();
     if (!text || busy) return;
     busy = true;
+    stopListen();
     add(text, "me");
     input.value = "";
     const wait = add("...", "bot");
+    setStatus("Soch raha hoon...");
+    let reply = "";
     try {
       const r = await fetch(API, {
         method: "POST",
@@ -1615,40 +1755,58 @@
       });
       const data = await r.json();
       if (!r.ok || !data.reply) throw new Error("bad");
-      wait.textContent = data.reply;
-      history.push({ role: "user", content: text }, { role: "assistant", content: data.reply });
-      if (usedVoice) speak(data.reply);
+      reply = data.reply;
+      wait.textContent = reply;
+      history.push({ role: "user", content: text }, { role: "assistant", content: reply });
     } catch (e) {
-      wait.textContent = "Maazrat, abhi jawab nahi de saka. Aap 0301 5394177 par call/WhatsApp kar sakte hain.";
+      reply = "Maazrat, abhi jawab nahi de saka. Aap 0301 5394177 par call ya WhatsApp kar sakte hain.";
+      wait.textContent = reply;
     }
-    usedVoice = false;
-    busy = false;
     msgs.scrollTop = msgs.scrollHeight;
+    busy = false;
+
+    const wasVoice = usedVoice;
+    usedVoice = false;
+    if (live || wasVoice) {
+      speak(reply, () => { if (live) startListen(); else setStatus("Text ya voice mein poochhein"); });
+    } else {
+      setStatus("Text ya voice mein poochhein");
+    }
   }
 
   $("pxSend").onclick = () => send(input.value);
   input.addEventListener("keydown", (e) => { if (e.key === "Enter") send(input.value); });
 
-  // Voice input (Chrome/Edge/Android; Firefox mein support nahi)
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  /* ---------- Single-shot mic (live mode ke bina) ---------- */
   if (!SR) {
     mic.style.display = "none";
-    $("pxLang").style.display = "none";
+    liveBtn.style.display = "none";
   } else {
-    let rec = null;
     mic.onclick = () => {
-      if (rec) { rec.stop(); return; }
-      rec = new SR();
-      rec.lang = $("pxLang").value;
-      rec.interimResults = false;
-      rec.onstart = () => mic.classList.add("on");
-      rec.onend = () => { mic.classList.remove("on"); rec = null; };
-      rec.onerror = () => { mic.classList.remove("on"); rec = null; };
-      rec.onresult = (e) => { usedVoice = true; send(e.results[0][0].transcript); };
-      rec.start();
+      if (live) return;
+      if (rec) { stopListen(); return; }
+      const r = new SR();
+      rec = r;
+      r.lang = $("pxLang").value;
+      r.interimResults = false;
+      r.onstart = () => mic.classList.add("on");
+      r.onend = () => { mic.classList.remove("on"); if (rec === r) rec = null; };
+      r.onerror = () => { mic.classList.remove("on"); if (rec === r) rec = null; };
+      r.onresult = (e) => { usedVoice = true; send(e.results[0][0].transcript); };
+      try { r.start(); } catch (e) { rec = null; }
     };
   }
-  if (window.speechSynthesis) speechSynthesis.getVoices();
+
+  /* ---------- Open / close ---------- */
+  $("pxBtn").onclick = () => { box.classList.toggle("open"); if (box.classList.contains("open")) input.focus(); else stopLive(); };
+  $("pxClose").onclick = () => { box.classList.remove("open"); stopLive(); };
+
+  // Awaaz ya zubaan badlo to chalti hui baat par asar
+  $("pxGender").onchange = () => { if (speaking) stopSpeaking(); };
+  $("pxLang").onchange = () => { if (live) { stopListen(); startListen(); } };
+
+  if (synth) { synth.getVoices(); synth.onvoiceschanged = () => synth.getVoices(); }
+  window.addEventListener("beforeunload", () => { synth && synth.cancel(); });
 })();
 </script>
 </body>
