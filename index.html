@@ -1522,7 +1522,7 @@
 
     <!-- ===== PubliXo AI Chat Widget (index.html mein </body> se pehle paste karo) ===== -->
 <!-- ===== PubliXo AI Chat Widget + LIVE VOICE (index.html mein </body> se pehle paste karo) ===== -->
-<!-- Purana widget (chat-widget.html) hata kar sirf ye lagao -->
+<!-- Purana widget hata kar sirf ye lagao. Awaaz browser ki (British English), text AI se -->
 <style>
   #pxBtn{position:fixed;right:20px;bottom:20px;width:60px;height:60px;border-radius:50%;border:none;cursor:pointer;z-index:2000;
     background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#0a0f1e;font-size:26px;box-shadow:0 6px 24px rgba(245,158,11,.5)}
@@ -1600,28 +1600,24 @@
 
   add("Assalam o Alaikum! 👋 PubliXo mein khush aamdeed. Websites, Meta Ads, social media ya QR code ke baare mein poochhein. Likh sakte hain, ya 📞 Live Baat dabao aur seedha bolna shuru karein.", "bot");
 
-  /* ---------- Voice selection (clear Indian English, girl / boy) ---------- */
-  const FEMALE = /heera|neerja|veena|priya|kalpana|lekha|aditi|raveena|swara|female|woman|girl|\bf\b/i;
-  const MALE = /ravi|prabhat|rishi|hemant|neel|kabir|madhur|male|man|boy/i;
+  /* ---------- Voice: browser ki British English awaaz (girl / boy) ---------- */
+  const FEMALE = /sonia|libby|maisie|hazel|susan|kate|serena|martha|stephanie|female|woman|girl|samantha|zira|heera|neerja/i;
+  const MALE = /ryan|thomas|george|daniel|oliver|arthur|alfie|male|man|boy|david|mark|guy|prabhat|ravi|rishi/i;
+  let speakToken = 0;
 
   function pickVoice(lang, gender) {
     const all = synth ? synth.getVoices() : [];
-    const base = lang.slice(0, 2).toLowerCase();
     const norm = (v) => v.lang.replace("_", "-").toLowerCase();
-    const inLang = (code) => all.filter((v) => norm(v).startsWith(code.toLowerCase()));
+    const inLang = (code) => all.filter((v) => norm(v).startsWith(code));
     const want = gender === "female" ? FEMALE : MALE;
     const other = gender === "female" ? MALE : FEMALE;
-
-    let pools = lang === "ur-PK"
+    const pools = lang === "ur-PK"
       ? [inLang("ur"), inLang("hi-in"), inLang("en-in")]
-      : [inLang("en-in"), inLang("hi-in"), inLang("en-gb"), inLang("en")];
-
+      : [inLang("en-gb"), inLang("en-in"), inLang("en")];
     for (const pool of pools) {
       if (!pool.length) continue;
-      // 1) naam se match (natural/online voices ko pehle)
       const named = pool.filter((v) => want.test(v.name));
       if (named.length) return named.sort((a, b) => /natural|online/i.test(b.name) - /natural|online/i.test(a.name))[0];
-      // 2) opposite gender ke naam wali voice na lo
       const rest = pool.filter((v) => !other.test(v.name));
       if (rest.length) return rest[0];
       if (gender === "female") return pool[0];
@@ -1638,23 +1634,34 @@
       .trim();
   }
 
-  /* ---------- Speaking (chunked, Chrome ke 15-sec cut bug se bachne ke liye) ---------- */
+  function stopSpeaking() {
+    speaking = false;
+    speakToken++;
+    synth && synth.cancel();
+  }
+
   function speak(text, done) {
     text = cleanForSpeech(text);
     if (!synth || !text) { done && done(); return; }
-    synth.cancel();
+    stopSpeaking();
+    const token = ++speakToken;
     const gender = $("pxGender").value;
     const urdu = /[\u0600-\u06FF]/.test(text);
-    const lang = urdu ? "ur-PK" : "en-IN";
+    const lang = urdu ? "ur-PK" : "en-GB";
     const voice = pickVoice(lang, gender);
-    const chunks = text.match(/[^.!?۔\n]+[.!?۔]?/g) || [text];
+    const chunks = text.match(/[^.!?\u06D4\n]+[.!?\u06D4]?/g) || [text];
     speaking = true;
     stopListen();
     setStatus("Bol raha hoon... 🔊");
 
     let i = 0;
-    const finish = () => { if (!speaking) return; speaking = false; done && done(); };
+    const finish = () => {
+      if (token !== speakToken || !speaking) return;
+      speaking = false;
+      done && done();
+    };
     const next = () => {
+      if (token !== speakToken) return;
       if (i >= chunks.length) return finish();
       const piece = chunks[i++].trim();
       if (!piece) return next();
@@ -1662,15 +1669,15 @@
       u.lang = voice ? voice.lang : lang;
       if (voice) u.voice = voice;
       u.rate = 0.95;
-      // Agar asli female/male voice na mile to pitch se farq banao
-      u.pitch = voice && (gender === "female" ? FEMALE : MALE).test(voice.name) ? 1 : (gender === "female" ? 1.25 : 0.8);
+      // Gender-naam wali voice na mile to pitch se farq
+      const matched = voice && (gender === "female" ? FEMALE : MALE).test(voice.name);
+      u.pitch = matched ? 1 : (gender === "female" ? 1.2 : 0.8);
       u.onend = next;
       u.onerror = next;
       synth.speak(u);
     };
     next();
   }
-  function stopSpeaking() { speaking = false; synth && synth.cancel(); }
 
   /* ---------- Listening ---------- */
   function stopListen() {
@@ -1751,7 +1758,7 @@
       const r = await fetch(API, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: text, history: history.slice(-8) }),
+        body: JSON.stringify({ message: text, history: history.slice(-8), english: $("pxLang").value === "en-IN" }),
       });
       const data = await r.json();
       if (!r.ok || !data.reply) throw new Error("bad");
@@ -1806,7 +1813,7 @@
   $("pxLang").onchange = () => { if (live) { stopListen(); startListen(); } };
 
   if (synth) { synth.getVoices(); synth.onvoiceschanged = () => synth.getVoices(); }
-  window.addEventListener("beforeunload", () => { synth && synth.cancel(); });
+  window.addEventListener("beforeunload", () => { stopSpeaking(); });
 })();
 </script>
 </body>
