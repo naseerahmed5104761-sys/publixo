@@ -88,7 +88,7 @@
     return d;
   }
 
-  add("Hello! 👋 Welcome to PubliXo. Ask me about websites, Meta Ads, social media or QR codes — in English, Roman Urdu, or اردو. You can type, or tap 📞 Live Chat and just talk to me.", "bot");
+  add("Hello! 👋 I am Sara, welcome to PubliXo. Ask me about websites, Meta Ads, social media marketing or dynamic QR codes.", "bot");
 
   /* ---------- Language detection ---------- */
   function detectLang(text) {
