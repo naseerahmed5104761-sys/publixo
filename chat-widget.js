@@ -1,4 +1,4 @@
-/* ===== PubliXo AI Chat Widget — English, Live Voice ===== */
+/* ===== PubliXo AI Chat Widget — Multi-language (EN / Roman Urdu / اردو), Girl Voice ===== */
 (function () {
   // ========== 1. CSS INJECT ==========
   const style = document.createElement('style');
@@ -42,9 +42,11 @@
     </div>
     <div id="pxMsgs"></div>
     <div id="pxOpts">
-      <select id="pxGender" title="Voice">
-        <option value="female">👩 Female voice</option>
-        <option value="male">👨 Male voice</option>
+      <select id="pxLang" title="Language">
+        <option value="auto">🌐 Auto</option>
+        <option value="en">English</option>
+        <option value="roman">Roman Urdu</option>
+        <option value="ur">اردو</option>
       </select>
       <button id="pxLive" title="Hands-free live conversation">📞 Live Chat</button>
     </div>
@@ -62,13 +64,15 @@
   const IDLE = "Ask by text or voice";
   const $ = (id) => document.getElementById(id);
   const box = $("pxBox"), msgs = $("pxMsgs"), input = $("pxIn"), mic = $("pxMic"),
-        liveBtn = $("pxLive"), statusEl = $("pxStatus");
+        liveBtn = $("pxLive"), statusEl = $("pxStatus"), langSel = $("pxLang");
   const synth = window.speechSynthesis;
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  const LISTEN_LANG = "en-IN";
-  const SPEAK_LANG = "en-GB";
 
-  let history = [], busy = false, speaking = false, live = false, rec = null, usedVoice = false, interimEl = null, speakToken = 0;
+  const LISTEN_LANG_MAP = { en: "en-IN", roman: "en-IN", ur: "ur-PK", auto: "en-IN" };
+  const SPEAK_LANG_MAP  = { en: "en-GB", roman: "en-IN", ur: "ur-PK", auto: "en-GB" };
+
+  let history = [], busy = false, speaking = false, live = false, rec = null,
+      usedVoice = false, interimEl = null, speakToken = 0, lastVoiceLang = "en";
 
   const setStatus = (t) => { statusEl.textContent = t; };
   function add(text, who) {
@@ -80,27 +84,60 @@
     return d;
   }
 
-  add("Hello! 👋 Welcome to PubliXo. Ask me about websites, Meta Ads, social media or QR codes. You can type, or tap 📞 Live Chat and just talk to me.", "bot");
+  add("Hello! 👋 Welcome to PubliXo. Ask me about websites, Meta Ads, social media or QR codes — in English, Roman Urdu, or اردو. You can type, or tap 📞 Live Chat and just talk to me.", "bot");
 
-  /* ---------- Voice ---------- */
-  const FEMALE = /sonia|libby|maisie|hazel|susan|kate|serena|martha|stephanie|female|woman|girl|samantha|zira/i;
-  const MALE = /ryan|thomas|george|daniel|oliver|arthur|alfie|male|man|boy|david|mark|guy/i;
+  /* ---------- Language detection ---------- */
+  function detectLang(text) {
+    if (/[\u0600-\u06FF]/.test(text)) return "ur";
+    const romanUrdu = /\b(kya|kaise|kaisay|kitna|kitne|kahan|kab|kyun|kyu|nahi|nahin|hai|hain|ho|ka|ki|ke|ko|se|mein|me|ap|aap|tum|hum|mujhe|mera|meri|apka|apki|acha|theek|bhai|ji|kar|karo|karna|bata|batao|chahiye|milega|milegi|rate|kiya|kaam|banwana|banana|paisa|paise|kitni|kitne|website|banwa|chahta|chahti|chahye|batana|bataen|batao)\b/i;
+    if (romanUrdu.test(text)) return "roman";
+    return "en";
+  }
 
-  function pickVoice(gender) {
+  function resolveLang(text) {
+    const sel = langSel.value;
+    if (sel === "auto") return detectLang(text);
+    return sel;
+  }
+
+  /* ---------- Voice picking (girl default) ---------- */
+  // Girl voice ko priority. Male list sirf fallback ke liye.
+  const FEMALE = /sonia|libby|maisie|hazel|susan|kate|serena|martha|stephanie|female|woman|girl|samantha|zira|aria|jenny|michelle|emma|olivia|ava|allison|joanna|salli|kendra|kimberly|amy|nicole|raveena|heera|swara|kalpana|neerja|aditi|priya|veena|urdu|zariyah|hala|salma|layla|amina/i;
+  const MALE = /ryan|thomas|george|daniel|oliver|arthur|alfie|male|man|boy|david|mark|guy|alex|fred|rishi|prabhat|hemant|madhur|ravi|kunal|hindi|urdu-male/i;
+
+  function pickVoice(langCode) {
     const all = synth ? synth.getVoices() : [];
+    if (!all.length) return null;
     const norm = (v) => v.lang.replace("_", "-").toLowerCase();
-    const want = gender === "female" ? FEMALE : MALE;
-    const other = gender === "female" ? MALE : FEMALE;
+
+    // 1) Urdu voice (agar urdu script)
+    if (langCode && langCode.toLowerCase().startsWith("ur")) {
+      const urPool = all.filter((v) => norm(v).startsWith("ur"));
+      if (urPool.length) {
+        const named = urPool.filter((v) => FEMALE.test(v.name));
+        return named[0] || urPool[0];
+      }
+      // Urdu voice na mile to Hindi/Indian female voice (Urdu script padh sakti hai)
+      const hiPool = all.filter((v) => norm(v).startsWith("hi") || norm(v).startsWith("en-in"));
+      const hiFemale = hiPool.filter((v) => FEMALE.test(v.name));
+      if (hiFemale.length) return hiFemale[0];
+      if (hiPool.length) return hiPool[0];
+    }
+
+    // 2) English / Roman Urdu ke liye female voice, priority en-gb > en-in > en
     for (const code of ["en-gb", "en-in", "en"]) {
       const pool = all.filter((v) => norm(v).startsWith(code));
       if (!pool.length) continue;
-      const named = pool.filter((v) => want.test(v.name));
-      if (named.length) return named.sort((a, b) => /natural|online/i.test(b.name) - /natural|online/i.test(a.name))[0];
-      const rest = pool.filter((v) => !other.test(v.name));
-      if (rest.length) return rest[0];
-      if (gender === "female") return pool[0];
+      const female = pool.filter((v) => FEMALE.test(v.name) && !MALE.test(v.name));
+      if (female.length) {
+        return female.sort((a, b) => /natural|online|google/i.test(b.name) - /natural|online|google/i.test(a.name))[0];
+      }
     }
-    return null;
+    // 3) Koi bhi female voice
+    const anyFemale = all.filter((v) => FEMALE.test(v.name) && !MALE.test(v.name));
+    if (anyFemale.length) return anyFemale[0];
+    // 4) Last resort
+    return all[0] || null;
   }
 
   function cleanForSpeech(t) {
@@ -118,13 +155,13 @@
     synth && synth.cancel();
   }
 
-  function speak(text, done) {
+  function speak(text, langCode, done) {
     text = cleanForSpeech(text);
     if (!synth || !text) { done && done(); return; }
     stopSpeaking();
     const token = ++speakToken;
-    const gender = $("pxGender").value;
-    const voice = pickVoice(gender);
+    const speakLang = SPEAK_LANG_MAP[langCode] || "en-GB";
+    const voice = pickVoice(speakLang);
     const chunks = text.match(/[^.!?\n]+[.!?]?/g) || [text];
     speaking = true;
     stopListen();
@@ -142,11 +179,11 @@
       const piece = chunks[i++].trim();
       if (!piece) return next();
       const u = new SpeechSynthesisUtterance(piece);
-      u.lang = voice ? voice.lang : SPEAK_LANG;
+      u.lang = voice ? voice.lang : speakLang;
       if (voice) u.voice = voice;
       u.rate = 0.95;
-      const matched = voice && (gender === "female" ? FEMALE : MALE).test(voice.name);
-      u.pitch = matched ? 1 : (gender === "female" ? 1.2 : 0.8);
+      // Girl voice default — high pitch
+      u.pitch = 1.15;
       u.onend = next;
       u.onerror = next;
       synth.speak(u);
@@ -165,7 +202,8 @@
     if (!SR || !live || speaking || busy || rec) return;
     const r = new SR();
     rec = r;
-    r.lang = LISTEN_LANG;
+    const selLang = langSel.value === "auto" ? lastVoiceLang : langSel.value;
+    r.lang = LISTEN_LANG_MAP[selLang] || "en-IN";
     r.continuous = false;
     r.interimResults = true;
     let finalText = "";
@@ -193,8 +231,12 @@
       rec = null;
       mic.classList.remove("on");
       if (interimEl) { interimEl.remove(); interimEl = null; }
-      if (finalText.trim()) { usedVoice = true; send(finalText); }
-      else if (live) setTimeout(startListen, 250);
+      if (finalText.trim()) {
+        usedVoice = true;
+        // Voice input ki zabaan yaad rakho
+        lastVoiceLang = resolveLang(finalText);
+        send(finalText);
+      } else if (live) setTimeout(startListen, 250);
     };
     try { r.start(); } catch (e) { rec = null; setTimeout(startListen, 500); }
   }
@@ -228,12 +270,20 @@
     input.value = "";
     const wait = add("...", "bot");
     setStatus("Thinking...");
+
+    const lang = usedVoice ? lastVoiceLang : resolveLang(text);
+
     let reply = "";
     try {
       const r = await fetch(API, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: text, history: history.slice(-8), english: true }),
+        body: JSON.stringify({
+          message: text,
+          history: history.slice(-8),
+          english: lang === "en",
+          lang: lang,
+        }),
       });
       const data = await r.json();
       if (!r.ok || !data.reply) throw new Error("bad");
@@ -241,7 +291,11 @@
       wait.textContent = reply;
       history.push({ role: "user", content: text }, { role: "assistant", content: reply });
     } catch (e) {
-      reply = "Sorry, I can't answer right now. Please call or WhatsApp us on 0301 5394177.";
+      reply = lang === "ur"
+        ? "معذرت، میں ابھی جواب نہیں دے سکتی۔ براہ کرم 0301 5394177 پر کال یا واٹس ایپ کریں۔"
+        : lang === "roman"
+        ? "Maazrat, main abhi jawab nahi de sakti. Please 0301 5394177 par call ya WhatsApp karein."
+        : "Sorry, I can't answer right now. Please call or WhatsApp us on 0301 5394177.";
       wait.textContent = reply;
     }
     msgs.scrollTop = msgs.scrollHeight;
@@ -250,7 +304,7 @@
     const wasVoice = usedVoice;
     usedVoice = false;
     if (live || wasVoice) {
-      speak(reply, () => { if (live) startListen(); else setStatus(IDLE); });
+      speak(reply, lang, () => { if (live) startListen(); else setStatus(IDLE); });
     } else {
       setStatus(IDLE);
     }
@@ -269,12 +323,18 @@
       if (rec) { stopListen(); return; }
       const r = new SR();
       rec = r;
-      r.lang = LISTEN_LANG;
+      const selLang = langSel.value === "auto" ? lastVoiceLang : langSel.value;
+      r.lang = LISTEN_LANG_MAP[selLang] || "en-IN";
       r.interimResults = false;
       r.onstart = () => mic.classList.add("on");
       r.onend = () => { mic.classList.remove("on"); if (rec === r) rec = null; };
       r.onerror = () => { mic.classList.remove("on"); if (rec === r) rec = null; };
-      r.onresult = (e) => { usedVoice = true; send(e.results[0][0].transcript); };
+      r.onresult = (e) => {
+        usedVoice = true;
+        const t = e.results[0][0].transcript;
+        lastVoiceLang = resolveLang(t);
+        send(t);
+      };
       try { r.start(); } catch (e) { rec = null; }
     };
   }
@@ -282,7 +342,7 @@
   /* ---------- Open / close ---------- */
   $("pxBtn").onclick = () => { box.classList.toggle("open"); if (box.classList.contains("open")) input.focus(); else stopLive(); };
   $("pxClose").onclick = () => { box.classList.remove("open"); stopLive(); };
-  $("pxGender").onchange = () => { if (speaking) stopSpeaking(); };
+  langSel.onchange = () => { if (speaking) stopSpeaking(); };
 
   if (synth) { synth.getVoices(); synth.onvoiceschanged = () => synth.getVoices(); }
   window.addEventListener("beforeunload", () => { stopSpeaking(); });
