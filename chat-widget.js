@@ -18,6 +18,7 @@
   .pxm.bot{background:#1a2332;color:#e2e8f0;align-self:flex-start;border-bottom-left-radius:4px}
   .pxm.me{background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#0a0f1e;align-self:flex-end;border-bottom-right-radius:4px}
   .pxm.interim{opacity:.55;font-style:italic}
+  .pxm.rtl{direction:rtl;text-align:right}
   #pxOpts{display:flex;gap:6px;padding:8px 10px;background:#111827;border-top:1px solid rgba(245,158,11,.2);align-items:center}
   #pxOpts select{background:#1a2332;color:#fbbf24;border:none;border-radius:8px;font-size:12px;padding:8px 6px;cursor:pointer;min-width:0;flex:1}
   #pxLive{flex:0 0 auto;border:none;border-radius:20px;padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer;
@@ -68,8 +69,10 @@
   const synth = window.speechSynthesis;
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 
+  // Listening: Urdu bolo -> ur-PK, English bolo -> en-IN (Pakistani/Indian accent ko behtar samajhta hai)
   const LISTEN_LANG_MAP = { en: "en-IN", roman: "en-IN", ur: "ur-PK", auto: "en-IN" };
-  const SPEAK_LANG_MAP  = { en: "en-GB", roman: "en-IN", ur: "ur-PK", auto: "en-GB" };
+  // Speaking: clean English = en-US, Urdu = ur-PK (Uzma)
+  const SPEAK_LANG_MAP  = { en: "en-US", roman: "en-IN", ur: "ur-PK", auto: "en-US" };
 
   let history = [], busy = false, speaking = false, live = false, rec = null,
       usedVoice = false, interimEl = null, speakToken = 0, lastVoiceLang = "en";
@@ -78,6 +81,7 @@
   function add(text, who) {
     const d = document.createElement("div");
     d.className = "pxm " + who;
+    if (/[\u0600-\u06FF]/.test(text)) d.classList.add("rtl");
     d.textContent = text;
     msgs.appendChild(d);
     msgs.scrollTop = msgs.scrollHeight;
@@ -89,7 +93,7 @@
   /* ---------- Language detection ---------- */
   function detectLang(text) {
     if (/[\u0600-\u06FF]/.test(text)) return "ur";
-    const romanUrdu = /\b(kya|kaise|kaisay|kitna|kitne|kahan|kab|kyun|kyu|nahi|nahin|hai|hain|ho|ka|ki|ke|ko|se|mein|me|ap|aap|tum|hum|mujhe|mera|meri|apka|apki|acha|theek|bhai|ji|kar|karo|karna|bata|batao|chahiye|milega|milegi|rate|kiya|kaam|banwana|banana|paisa|paise|kitni|kitne|website|banwa|chahta|chahti|chahye|batana|bataen|batao)\b/i;
+    const romanUrdu = /\b(kya|kaise|kaisay|kitna|kitne|kahan|kab|kyun|kyu|nahi|nahin|hai|hain|ho|ka|ki|ke|ko|se|mein|me|ap|aap|tum|hum|mujhe|mera|meri|apka|apki|acha|theek|bhai|ji|kar|karo|karna|bata|batao|chahiye|milega|milegi|rate|kiya|kaam|banwana|banana|paisa|paise|kitni|banwa|chahta|chahti|chahye|batana|bataen)\b/i;
     if (romanUrdu.test(text)) return "roman";
     return "en";
   }
@@ -100,44 +104,51 @@
     return sel;
   }
 
-  /* ---------- Voice picking (girl default) ---------- */
-  // Girl voice ko priority. Male list sirf fallback ke liye.
-  const FEMALE = /sonia|libby|maisie|hazel|susan|kate|serena|martha|stephanie|female|woman|girl|samantha|zira|aria|jenny|michelle|emma|olivia|ava|allison|joanna|salli|kendra|kimberly|amy|nicole|raveena|heera|swara|kalpana|neerja|aditi|priya|veena|urdu|zariyah|hala|salma|layla|amina/i;
-  const MALE = /ryan|thomas|george|daniel|oliver|arthur|alfie|male|man|boy|david|mark|guy|alex|fred|rishi|prabhat|hemant|madhur|ravi|kunal|hindi|urdu-male/i;
+  /* ---------- Voice picking ---------- */
+  const FEMALE = /uzma|sonia|libby|maisie|hazel|susan|kate|serena|martha|stephanie|female|woman|girl|samantha|zira|aria|jenny|michelle|emma|olivia|ava|allison|joanna|salli|kendra|kimberly|amy|nicole|raveena|heera|swara|kalpana|neerja|aditi|priya|veena|zariyah|hala|salma|layla|amina/i;
+  // \b zaroori hai warna "female" ke andar "male" match ho jata hai
+  const MALE = /\b(ryan|thomas|george|daniel|oliver|arthur|alfie|male|man|boy|david|mark|guy|alex|fred|rishi|prabhat|hemant|madhur|ravi|kunal|asad|salman|liam|james|brian|eric|roger|steffan)\b/i;
+
+  const normLang = (v) => v.lang.replace("_", "-").toLowerCase();
+  const vScore = (v) =>
+    (FEMALE.test(v.name) ? 4 : 0) +
+    (/natural|online/i.test(v.name) ? 3 : 0) +
+    (/google|microsoft/i.test(v.name) ? 1 : 0);
+  const best = (pool) => pool.sort((a, b) => vScore(b) - vScore(a))[0] || null;
 
   function pickVoice(langCode) {
     const all = synth ? synth.getVoices() : [];
     if (!all.length) return null;
-    const norm = (v) => v.lang.replace("_", "-").toLowerCase();
+    const code = (langCode || "en-US").toLowerCase();
+    const notMale = (v) => !MALE.test(v.name);
 
-    // 1) Urdu voice (agar urdu script)
-    if (langCode && langCode.toLowerCase().startsWith("ur")) {
-      const urPool = all.filter((v) => norm(v).startsWith("ur"));
-      if (urPool.length) {
-        const named = urPool.filter((v) => FEMALE.test(v.name));
-        return named[0] || urPool[0];
-      }
-      // Urdu voice na mile to Hindi/Indian female voice (Urdu script padh sakti hai)
-      const hiPool = all.filter((v) => norm(v).startsWith("hi") || norm(v).startsWith("en-in"));
-      const hiFemale = hiPool.filter((v) => FEMALE.test(v.name));
-      if (hiFemale.length) return hiFemale[0];
-      if (hiPool.length) return hiPool[0];
+    // --- Urdu: Uzma pehle ---
+    if (code.startsWith("ur")) {
+      const ur = all.filter((v) => normLang(v).startsWith("ur") && notMale(v));
+      const uzma = ur.find((v) => /uzma/i.test(v.name));
+      if (uzma) return uzma;
+      if (ur.length) return best(ur);
+      // Urdu voice na ho to Hindi female (Urdu script padh leti hai)
+      const hi = all.filter((v) => normLang(v).startsWith("hi") && notMale(v));
+      if (hi.length) return best(hi);
+      return null;
     }
 
-    // 2) English / Roman Urdu ke liye female voice, priority en-gb > en-in > en
-    for (const code of ["en-gb", "en-in", "en"]) {
-      const pool = all.filter((v) => norm(v).startsWith(code));
-      if (!pool.length) continue;
-      const female = pool.filter((v) => FEMALE.test(v.name) && !MALE.test(v.name));
-      if (female.length) {
-        return female.sort((a, b) => /natural|online|google/i.test(b.name) - /natural|online|google/i.test(a.name))[0];
-      }
+    // --- Roman Urdu: Indian female (Roman Urdu/Hindi ke alfaaz behtar bolti hai) ---
+    if (code === "en-in") {
+      const inPool = all.filter((v) => normLang(v) === "en-in" && notMale(v));
+      if (inPool.length) return best(inPool);
     }
-    // 3) Koi bhi female voice
-    const anyFemale = all.filter((v) => FEMALE.test(v.name) && !MALE.test(v.name));
-    if (anyFemale.length) return anyFemale[0];
-    // 4) Last resort
-    return all[0] || null;
+
+    // --- Clean English: en-US / en-GB female, Indian accent nahi ---
+    for (const group of [["en-us"], ["en-gb"], ["en-au", "en-ca"]]) {
+      const pool = all.filter((v) => group.includes(normLang(v)) && notMale(v));
+      const f = pool.filter((v) => FEMALE.test(v.name));
+      if (f.length) return best(f);
+    }
+    const anyEn = all.filter((v) => normLang(v).startsWith("en") && !normLang(v).startsWith("en-in") && notMale(v));
+    if (anyEn.length) return best(anyEn);
+    return all.find((v) => normLang(v).startsWith("en")) || all[0];
   }
 
   function cleanForSpeech(t) {
@@ -160,9 +171,9 @@
     if (!synth || !text) { done && done(); return; }
     stopSpeaking();
     const token = ++speakToken;
-    const speakLang = SPEAK_LANG_MAP[langCode] || "en-GB";
+    const speakLang = SPEAK_LANG_MAP[langCode] || "en-US";
     const voice = pickVoice(speakLang);
-    const chunks = text.match(/[^.!?\n]+[.!?]?/g) || [text];
+    const chunks = text.match(/[^.!?۔؟\n]+[.!?۔؟]?/g) || [text];
     speaking = true;
     stopListen();
     setStatus("Speaking... 🔊");
@@ -181,9 +192,8 @@
       const u = new SpeechSynthesisUtterance(piece);
       u.lang = voice ? voice.lang : speakLang;
       if (voice) u.voice = voice;
-      u.rate = 0.95;
-      // Girl voice default — high pitch
-      u.pitch = 1.15;
+      u.rate = langCode === "ur" ? 0.95 : 1;
+      u.pitch = 1; // natural voice, no artificial pitch
       u.onend = next;
       u.onerror = next;
       synth.speak(u);
@@ -233,10 +243,13 @@
       if (interimEl) { interimEl.remove(); interimEl = null; }
       if (finalText.trim()) {
         usedVoice = true;
-        // Voice input ki zabaan yaad rakho
-        lastVoiceLang = resolveLang(finalText);
+        lastVoiceLang = resolveLang(finalText); // Urdu bola -> "ur", English bola -> "en"
         send(finalText);
-      } else if (live) setTimeout(startListen, 250);
+      } else if (live) {
+        // Auto mode: kuch sunai na diya to agli dafa dusri zabaan try karo
+        if (langSel.value === "auto") lastVoiceLang = lastVoiceLang === "ur" ? "en" : "ur";
+        setTimeout(startListen, 250);
+      }
     };
     try { r.start(); } catch (e) { rec = null; setTimeout(startListen, 500); }
   }
@@ -271,6 +284,7 @@
     const wait = add("...", "bot");
     setStatus("Thinking...");
 
+    // Voice se aaya to bole hue zabaan, warna jo likha hai uski zabaan
     const lang = usedVoice ? lastVoiceLang : resolveLang(text);
 
     let reply = "";
@@ -289,6 +303,7 @@
       if (!r.ok || !data.reply) throw new Error("bad");
       reply = data.reply;
       wait.textContent = reply;
+      if (/[\u0600-\u06FF]/.test(reply)) wait.classList.add("rtl");
       history.push({ role: "user", content: text }, { role: "assistant", content: reply });
     } catch (e) {
       reply = lang === "ur"
@@ -297,6 +312,7 @@
         ? "Maazrat, main abhi jawab nahi de sakti. Please 0301 5394177 par call ya WhatsApp karein."
         : "Sorry, I can't answer right now. Please call or WhatsApp us on 0301 5394177.";
       wait.textContent = reply;
+      if (lang === "ur") wait.classList.add("rtl");
     }
     msgs.scrollTop = msgs.scrollHeight;
     busy = false;
