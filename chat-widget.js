@@ -274,57 +274,58 @@
   liveBtn.onclick = () => (live ? stopLive() : startLive());
 
   /* ---------- Chat ---------- */
-  async function send(text) {
-    text = (text || "").trim();
-    if (!text || busy) return;
-    busy = true;
-    stopListen();
-    add(text, "me");
-    input.value = "";
-    const wait = add("...", "bot");
-    setStatus("Thinking...");
+async function send(text) {
+  text = (text || "").trim();
+  if (!text || busy) return;
+  busy = true;
+  stopListen();
+  add(text, "me");
+  input.value = "";
+  const wait = add("...", "bot");
+  setStatus("Thinking...");
 
-    // Voice se aaya to bole hue zabaan, warna jo likha hai uski zabaan
-    const lang = usedVoice ? lastVoiceLang : resolveLang(text);
+  // Voice on ho to Roman ki jagah Urdu script, text mode mein jo likha usi zabaan mein
+  let lang = usedVoice ? lastVoiceLang : resolveLang(text);
+  if ((live || usedVoice) && lang === "roman") lang = "ur";
 
-    let reply = "";
-    try {
-      const r = await fetch(API, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          message: text,
-          history: history.slice(-8),
-          english: lang === "en",
-          lang: lang,
-        }),
-      });
-      const data = await r.json();
-      if (!r.ok || !data.reply) throw new Error("bad");
-      reply = data.reply;
-      wait.textContent = reply;
-      if (/[\u0600-\u06FF]/.test(reply)) wait.classList.add("rtl");
-      history.push({ role: "user", content: text }, { role: "assistant", content: reply });
-    } catch (e) {
-      reply = lang === "ur"
-        ? "معذرت، میں ابھی جواب نہیں دے سکتی۔ براہ کرم 0301 5394177 پر کال یا واٹس ایپ کریں۔"
-        : lang === "roman"
-        ? "Maazrat, main abhi jawab nahi de sakti. Please 0301 5394177 par call ya WhatsApp karein."
-        : "Sorry, I can't answer right now. Please call or WhatsApp us on 0301 5394177.";
-      wait.textContent = reply;
-      if (lang === "ur") wait.classList.add("rtl");
-    }
-    msgs.scrollTop = msgs.scrollHeight;
-    busy = false;
-
-    const wasVoice = usedVoice;
-    usedVoice = false;
-    if (live || wasVoice) {
-      speak(reply, lang, () => { if (live) startListen(); else setStatus(IDLE); });
-    } else {
-      setStatus(IDLE);
-    }
+  let reply = "";
+  try {
+    const r = await fetch(API, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        message: text,
+        history: history.slice(-8),
+        english: lang === "en",
+        lang: lang,
+      }),
+    });
+    const data = await r.json();
+    if (!r.ok || !data.reply) throw new Error("bad");
+    reply = data.reply;
+    wait.textContent = reply;
+    if (/[\u0600-\u06FF]/.test(reply)) wait.classList.add("rtl");
+    history.push({ role: "user", content: text }, { role: "assistant", content: reply });
+  } catch (e) {
+    reply = lang === "ur"
+      ? "معذرت، میں ابھی جواب نہیں دے سکتی۔ براہ کرم 0301 5394177 پر کال یا واٹس ایپ کریں۔"
+      : lang === "roman"
+      ? "Maazrat, main abhi jawab nahi de sakti. Please 0301 5394177 par call ya WhatsApp karein."
+      : "Sorry, I can't answer right now. Please call or WhatsApp us on 0301 5394177.";
+    wait.textContent = reply;
+    if (lang === "ur") wait.classList.add("rtl");
   }
+  msgs.scrollTop = msgs.scrollHeight;
+  busy = false;
+
+  const wasVoice = usedVoice;
+  usedVoice = false;
+  if (live || wasVoice) {
+    speak(reply, lang, () => { if (live) startListen(); else setStatus(IDLE); });
+  } else {
+    setStatus(IDLE);
+  }
+}
 
   $("pxSend").onclick = () => send(input.value);
   input.addEventListener("keydown", (e) => { if (e.key === "Enter") send(input.value); });
