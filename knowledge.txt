@@ -1,6 +1,6 @@
 BUSINESS: PubliXo
 Tagline: Publishing & Beyond. Slogan: Your Vision. Our Development.
-About: PubliXo provides professional Web Development, WordPress Development, Meta Ads, Social Media Management, Digital Marketing, Creative Design and Dynamic QR Code services. Modern, responsive and performance-driven solutions tailored to business goals.
+About: PubliXo provides professional Web Development, WordPress Development, Meta Ads, Social Media Management, Digital Marketing, Creative Design, Dynamic QR Code and AI Chatbot Integration services. Modern, responsive and performance-driven solutions tailored to business goals.
 
 CONTACT:
 Call / WhatsApp: 0301 5394177
@@ -43,6 +43,13 @@ RULE 5: Dynamic QR Code (price depends on the number of pages and the number of 
 - Number of extra 5-change blocks = round up of (changes - 5) / 5, and 0 if changes are 5 or fewer.
 - Changes are counted per month in total (not per page).
 
+RULE 6: AI Chatbot Integration for a website (3 packages, one-time setup price)
+- Basic = PKR 10,000. Includes: text chatbot, answers customer questions using the client's business information (services, prices, FAQs), chat widget added to the website.
+- Standard = PKR 17,000. Includes everything in Basic, plus voice chat (customers can speak their question and listen to the answer), and support for Roman Urdu, English and Urdu.
+- Advanced = PKR 30,000. Includes everything in Standard, plus lead capture (the customer's name and phone number is sent to the owner by email or WhatsApp), bigger pricing rules, and long product lists.
+- The price is for the one-time setup. Monthly support, extra languages, knowledge updates and WhatsApp connection are not included in these prices; refer the customer to 0301 5394177 for those.
+- If a customer only wants a simple text chatbot, suggest Basic. If they want voice, suggest Standard. If they want leads or a big product list, suggest Advanced.
+
 QUICK TABLES (use these numbers directly):
 
 WordPress website (pages -> total PKR):
@@ -70,10 +77,11 @@ OTHER SERVICE PRICES (starting from, PKR):
 - Digital Marketing: 14,000 (discounted from 15,000)
 - Website Maintenance & Support: 14,000 (discounted from 15,000)
 - Creative Design Services: 6,000 (discounted from 7,000)
+- AI Chatbot Integration (for a website): Basic 10,000 | Standard 17,000 | Advanced 30,000 (see RULE 6)
 
-NOT AVAILABLE (do not guess, refer the customer to 0301 5394177): office address, email, working hours, portfolio, delivery timelines, payment methods, any specific negotiated or discounted price (the team decides on WhatsApp), Meta ad budget (the money spent on ads), hosting or domain costs, custom packages beyond what is listed here.
+NOT AVAILABLE (do not guess, refer the customer to 0301 5394177): office address, email, working hours, portfolio, delivery timelines, payment methods, any specific negotiated or discounted price (the team decides on WhatsApp), Meta ad budget (the money spent on ads), hosting or domain costs, monthly support or maintenance cost for a chatbot, extra chatbot languages, chatbot knowledge updates, AI usage costs, custom packages beyond what is listed here.
 
-SERVICES (11 total):
+SERVICES (12 total):
 
 1. WordPress Website Development
 A professional, modern, responsive WordPress website designed for your business. User-friendly, clean layouts, mobile responsiveness, SEO-friendly structure and performance optimization.
@@ -130,8 +138,12 @@ A smart QR code that never expires. The QR code stays the same, but the content 
 Includes: Same QR Code, Editable Content, Monthly Updates, Scan Analytics, Custom Design.
 Price: see RULE 5 (PKR 1,000 per month for 1 page with 5 changes; + PKR 300 per extra page; + PKR 200 per extra 5 changes).
 
+12. AI Chatbot Integration (NEW)
+An AI chatbot added to your website. Customers can ask questions and the chatbot answers using your business information (services, prices, FAQs). Available in 3 packages: Basic, Standard (with voice) and Advanced (with lead capture).
+Price: see RULE 6 (Basic PKR 10,000, Standard PKR 17,000, Advanced PKR 30,000). Final price depends on the requirements and is negotiable; contact 0301 5394177.
+
 CATEGORIES:
-- Web Development: WordPress Website Development, Custom Web Development, E-Commerce Development, WordPress Redesign, Website Speed Optimization, Website Maintenance, Dynamic QR Code Service
+- Web Development: WordPress Website Development, Custom Web Development, E-Commerce Development, WordPress Redesign, Website Speed Optimization, Website Maintenance, Dynamic QR Code Service, AI Chatbot Integration
 - Digital Marketing: Meta Ads Management, Social Media Management, Digital Marketing
 - Creative Services: Social Media Designs, Ad Creatives, Business Graphics
 
@@ -150,3 +162,12 @@ A: A Dynamic QR code for 1 page with 5 changes is PKR 1,000 per month. Each extr
 
 Q: The price is high, can it be reduced?
 A: Yes, our prices are negotiable. The final price is decided after discussing your requirements with the team. For a better rate, please WhatsApp or call 0301 5394177.
+
+Q: How much does it cost to add a chatbot to my website?
+A: We offer 3 chatbot packages (one-time setup): Basic PKR 10,000 (text chatbot that answers from your business information, with a chat widget on your website), Standard PKR 17,000 (Basic plus voice chat and Roman Urdu / English / Urdu support), and Advanced PKR 30,000 (Standard plus lead capture and bigger pricing rules or product lists). Prices are negotiable, so please WhatsApp or call 0301 5394177 for an exact quote.
+
+Q: Can the chatbot talk or understand voice?
+A: Yes, voice chat is included in the Standard package (PKR 17,000) and the Advanced package (PKR 30,000). Customers can speak their question and listen to the answer.
+
+Q: Can the chatbot collect customer details (leads)?
+A: Yes, lead capture is included in the Advanced package (PKR 30,000). The customer's name and phone number are sent to you by email or WhatsApp.
