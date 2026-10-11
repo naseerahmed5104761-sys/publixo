@@ -79,10 +79,10 @@
   let history = [], busy = false, speaking = false, live = false, rec = null,
       usedVoice = false, interimEl = null, speakToken = 0, lastVoiceLang = "en";
 
-  // Lead capture state
+  // Lead capture state (AI naam/number khud samajhta hai, widget sirf yaad rakhta hai)
   let userMsgs = 0, chatLang = "en";
-  let leadStep = 0;   // 0 = not asked, 1 = waiting for name, 2 = waiting for phone, 3 = done / declined
-  let leadAsks = 0, leadName = "", leadPhone = "";
+  let leadName = "", leadPhone = "", leadDeclined = false, leadSubmitted = false;
+  let leadAsks = 0, sinceAsk = 0;
 
   const setStatus = (t) => { statusEl.textContent = t; };
   function add(text, who) {
@@ -280,118 +280,12 @@
   }
   liveBtn.onclick = () => (live ? stopLive() : startLive());
 
-  /* ---------- Lead capture (naam + number) ---------- */
-  /* LEAD-HELPERS-START */
-  const LEAD_TEXT = {
-    askName: {
-      en: "By the way, may I know your name so our team can follow up with you? (Type \"skip\" if you prefer not to.)",
-      roman: "Waise, kya main aap ka naam jaan sakti hoon taake hamari team aap se rabta kar sake? (Na dena chahein to \"skip\" likh dein.)",
-      ur: "ویسے، کیا میں آپ کا نام جان سکتی ہوں تاکہ ہماری ٹیم آپ سے رابطہ کر سکے؟ (اگر نہ دینا چاہیں تو \"skip\" کہہ دیں۔)",
-    },
-    askNameAgain: {
-      en: "Great! Please tell me your name.",
-      roman: "Zabardast! Meherbani karke apna naam bata dein.",
-      ur: "بہت خوب! براہ کرم اپنا نام بتا دیں۔",
-    },
-    badName: {
-      en: "Sorry, I didn't catch that. Could you tell me just your name?",
-      roman: "Maazrat, samajh nahi aaya. Sirf apna naam bata dein.",
-      ur: "معذرت، سمجھ نہیں آیا۔ صرف اپنا نام بتا دیں۔",
-    },
-    askPhone: {
-      en: "Thanks, {name}! What's the best phone or WhatsApp number to reach you on? Our team will only use it to contact you about your enquiry.",
-      roman: "Shukriya {name}! Aap ka phone ya WhatsApp number kya hai? Hamari team sirf aap se rabta karne ke liye use karegi.",
-      ur: "شکریہ {name}! آپ کا فون یا واٹس ایپ نمبر کیا ہے؟ ہماری ٹیم صرف آپ سے رابطے کے لیے استعمال کرے گی۔",
-    },
-    badPhone: {
-      en: "That number doesn't look right. Please enter a valid phone number, for example 0301 1234567.",
-      roman: "Ye number theek nahi lag raha. Sahi phone number likhein, jaise 0301 1234567.",
-      ur: "یہ نمبر درست نہیں لگ رہا۔ براہ کرم درست فون نمبر بتائیں، جیسے 0301 1234567۔",
-    },
-    thanks: {
-      en: "Thank you, {name}! Our team will contact you soon. Feel free to ask me anything else.",
-      roman: "Shukriya {name}! Hamari team jald aap se rabta karegi. Aap kuch aur bhi poochh sakte hain.",
-      ur: "شکریہ {name}! ہماری ٹیم جلد آپ سے رابطہ کرے گی۔ آپ مزید کچھ بھی پوچھ سکتے ہیں۔",
-    },
-    failed: {
-      en: "Thanks, {name}! I couldn't send your details just now. Please WhatsApp us on 0301 5394177 and we'll help right away.",
-      roman: "Shukriya {name}! Abhi aap ki details nahi bhej saki. Meherbani karke 0301 5394177 par WhatsApp karein.",
-      ur: "شکریہ {name}! ابھی آپ کی تفصیلات نہیں بھیج سکی۔ براہ کرم 0301 5394177 پر واٹس ایپ کریں۔",
-    },
-    declined: {
-      en: "No problem at all! Feel free to ask me anything else.",
-      roman: "Koi baat nahi! Aap kuch bhi poochh sakte hain.",
-      ur: "کوئی بات نہیں! آپ مزید کچھ بھی پوچھ سکتے ہیں۔",
-    },
+  /* ---------- Lead capture ---------- */
+  const LEAD_FAIL = {
+    en: "Thanks, {name}! I couldn't pass on your details just now. Please WhatsApp us on 0301 5394177 and we'll help right away.",
+    roman: "Shukriya {name}! Abhi aap ki details nahi bhej saki. Meherbani karke 0301 5394177 par WhatsApp karein.",
+    ur: "شکریہ {name}! ابھی آپ کی تفصیلات نہیں بھیج سکی۔ براہ کرم 0301 5394177 پر واٹس ایپ کریں۔",
   };
-
-  const DECLINE = ["skip", "no", "nope", "nah", "no thanks", "no thank you", "not now", "later", "nahi", "nahin", "nai", "na",
-    "abhi nahi", "abhi nahin", "rehne do", "نہیں", "نہ", "رہنے دیں", "چھوڑیں", "اسکپ"];
-  const YES = ["yes", "yeah", "yep", "ok", "okay", "sure", "haan", "han", "ji", "jee", "haan ji", "جی", "ہاں"];
-
-  const normAns = (t) => t.toLowerCase().replace(/[.!?؟،,۔]/g, "").trim();
-  function isDecline(t) {
-    const n = normAns(t);
-    return DECLINE.includes(n) || n.startsWith("nahi ") || n.startsWith("no thanks") || n.startsWith("not now");
-  }
-  function isYes(t) { return YES.includes(normAns(t)); }
-
-  function looksLikeQuestion(t) {
-    if (/[?؟]/.test(t)) return true;
-    if (t.trim().split(/\s+/).length > 5) return true;
-    return /^(how|what|why|when|where|which|who|can|do|does|is|are|kya|kaise|kitna|kitne|kab|kyun|price|rate|cost)\b/i.test(t.trim());
-  }
-
-  function cleanName(t) {
-    let n = t.trim()
-      .replace(/^(my name is|name is|i am|i'm|im|this is|mera naam|mera name|naam|main|mai|میرا نام|میں)\s+/i, "")
-      .replace(/\s+(hai|hy|ہے)$/i, "")
-      .replace(/[^\p{L}\s.'-]/gu, "")
-      .replace(/\s+/g, " ")
-      .trim();
-    if (/[\d۰-۹٠-٩]/.test(t)) return "";          // naam mein number nahi hota
-    if (n.length < 2 || n.length > 40) return "";
-    if (n.split(" ").length > 4) return "";
-    // English naam ka pehla harf bara
-    n = n.replace(/\b([a-z])/g, (m) => m.toUpperCase());
-    return n;
-  }
-
-  function extractDigits(t) {
-    const map = { "۰": "0", "۱": "1", "۲": "2", "۳": "3", "۴": "4", "۵": "5", "۶": "6", "۷": "7", "۸": "8", "۹": "9",
-                  "٠": "0", "١": "1", "٢": "2", "٣": "3", "٤": "4", "٥": "5", "٦": "6", "٧": "7", "٨": "8", "٩": "9" };
-    const ascii = t.replace(/[۰-۹٠-٩]/g, (c) => map[c]);
-    return { digits: ascii.replace(/\D/g, ""), plus: /^\s*\+/.test(ascii) };
-  }
-
-  function normalizePhone(d) {
-    if (d.digits.length === 10 && d.digits[0] === "3") return "0" + d.digits;       // 3011234567 -> 03011234567
-    if (d.digits.length === 12 && d.digits.startsWith("92")) return "+" + d.digits;  // 923011234567
-    return (d.plus ? "+" : "") + d.digits;
-  }
-  const validPhone = (d) => d.digits.length >= 10 && d.digits.length <= 15;
-  /* LEAD-HELPERS-END */
-
-  function leadLang(wasVoice) {
-    let l = langSel.value !== "auto" ? langSel.value : chatLang;
-    if ((live || wasVoice) && l === "roman") l = "ur";
-    return l;
-  }
-
-  function shouldAskLead() {
-    if (leadStep >= 2) return false;                         // naam mil chuka ya done/declined
-    if (leadAsks === 0) return userMsgs >= LEAD_AFTER;
-    if (leadAsks === 1 && leadStep === 1) return userMsgs >= LEAD_AFTER * 2;  // ek dafa dobara
-    return false;
-  }
-
-  // Bot ka jawab dikhao (aur live/voice mode mein bolo)
-  function botSay(text, lang, wasVoice) {
-    add(text, "bot");
-    busy = false;
-    if (live || wasVoice) speak(text, lang, () => { if (live) startListen(); else setStatus(IDLE); });
-    else setStatus(IDLE);
-  }
 
   async function submitLead() {
     try {
@@ -412,43 +306,23 @@
     }
   }
 
-  // true = ye message naam/number ka jawab tha (AI ko nahi bhejna). false = normal sawal hai.
-  async function handleLeadInput(text, wasVoice) {
-    const l = leadLang(wasVoice);
-    const T = (key) => LEAD_TEXT[key][l];
+  // AI ne jo naam/number/inkar samjha, wo yahan yaad rakho
+  function applyLead(l) {
+    if (!l || typeof l !== "object") return;
+    if (l.declined) leadDeclined = true;
+    if (l.name) leadName = String(l.name).slice(0, 60);
+    if (l.phone) leadPhone = String(l.phone);
+    if (l.asked) { leadAsks++; sinceAsk = 0; } else if (leadAsks > 0) sinceAsk++;
 
-    if (isDecline(text)) {
-      leadStep = 3;
-      botSay(T("declined"), l, wasVoice);
-      return true;
+    if (leadName && leadPhone && !leadSubmitted) {
+      leadSubmitted = true;
+      submitLead().then((ok) => {
+        if (!ok) {
+          const k = chatLang === "ur" ? "ur" : chatLang === "roman" ? "roman" : "en";
+          add(LEAD_FAIL[k].replace("{name}", leadName), "bot");
+        }
+      });
     }
-
-    if (leadStep === 1) {
-      if (looksLikeQuestion(text)) return false;
-      if (isYes(text)) { botSay(T("askNameAgain"), l, wasVoice); return true; }
-      const name = cleanName(text);
-      if (!name) { botSay(T("badName"), l, wasVoice); return true; }
-      leadName = name;
-      leadStep = 2;
-      botSay(T("askPhone").replace("{name}", name), l, wasVoice);
-      return true;
-    }
-
-    if (leadStep === 2) {
-      const d = extractDigits(text);
-      if (!validPhone(d)) {
-        if (looksLikeQuestion(text) && d.digits.length < 6) return false;
-        botSay(T("badPhone"), l, wasVoice);
-        return true;
-      }
-      leadPhone = normalizePhone(d);
-      leadStep = 3;
-      setStatus("Saving...");
-      const ok = await submitLead();
-      botSay(T(ok ? "thanks" : "failed").replace("{name}", leadName), l, wasVoice);
-      return true;
-    }
-    return false;
   }
 
   /* ---------- Chat ---------- */
@@ -465,17 +339,23 @@
     if ((live || usedVoice) && lang === "roman") lang = "ur";
     const wasVoice = usedVoice;
     usedVoice = false;
-
-    // Naam / number ka jawab? Ye AI ko nahi jata.
-    if (leadStep === 1 || leadStep === 2) {
-      if (await handleLeadInput(text, wasVoice)) return;
-    }
+    chatLang = lang;
 
     const wait = add("...", "bot");
     setStatus("Thinking...");
-    chatLang = lang;
 
-    let reply = "", ok = false;
+    // 3 sawalon ke baad AI se kaho ke naam/number naram andaz mein poochhe
+    const leadActive = !leadDeclined && !leadSubmitted && (userMsgs + 1 >= LEAD_AFTER);
+    const askNow = leadActive && (leadAsks === 0 || (leadAsks === 1 && sinceAsk >= 3));
+    const leadInfo = {
+      active: leadActive,
+      ask_now: askNow,
+      name: leadName || null,
+      phone: leadPhone || null,
+      declined: leadDeclined,
+    };
+
+    let reply = "";
     try {
       const r = await fetch(API, {
         method: "POST",
@@ -485,6 +365,7 @@
           history: history.slice(-8),
           english: lang === "en",
           lang: lang,
+          lead: leadInfo,
         }),
       });
       const data = await r.json();
@@ -493,8 +374,8 @@
       wait.textContent = reply;
       if (/[\u0600-\u06FF]/.test(reply)) wait.classList.add("rtl");
       history.push({ role: "user", content: text }, { role: "assistant", content: reply });
-      ok = true;
       userMsgs++;   // sirf kamyab jawab wale sawal ginte hain
+      applyLead(data.lead);
     } catch (e) {
       reply = lang === "ur"
         ? "معذرت، میں ابھی جواب نہیں دے سکتی۔ براہ کرم 0301 5394177 پر کال یا واٹس ایپ کریں۔"
@@ -507,18 +388,8 @@
     msgs.scrollTop = msgs.scrollHeight;
     busy = false;
 
-    // 3 sawalon ke baad naam poochho (jawab ke saath hi)
-    let spoken = reply;
-    if (ok && shouldAskLead()) {
-      const askText = LEAD_TEXT.askName[lang === "ur" ? "ur" : lang === "roman" ? "roman" : "en"];
-      add(askText, "bot");
-      leadStep = 1;
-      leadAsks++;
-      spoken = reply + " " + askText;
-    }
-
     if (live || wasVoice) {
-      speak(spoken, lang, () => { if (live) startListen(); else setStatus(IDLE); });
+      speak(reply, lang, () => { if (live) startListen(); else setStatus(IDLE); });
     } else {
       setStatus(IDLE);
     }
