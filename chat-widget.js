@@ -102,8 +102,12 @@
   /* ---------- Language detection ---------- */
   function detectLang(text) {
     if (/[\u0600-\u06FF]/.test(text)) return "ur";
-    const romanUrdu = /\b(kya|kaise|kaisay|kitna|kitne|kahan|kab|kyun|kyu|nahi|nahin|hai|hain|ho|ka|ki|ke|ko|se|mein|me|ap|aap|tum|hum|mujhe|mera|meri|apka|apki|acha|theek|bhai|ji|kar|karo|karna|bata|batao|chahiye|milega|milegi|rate|kiya|kaam|banwana|banana|paisa|paise|kitni|banwa|chahta|chahti|chahye|batana|bataen)\b/i;
-    if (romanUrdu.test(text)) return "roman";
+    // Sirf wo alfaaz jo English se nahi takrate ("me", "rate", "banana" jaise English lafz yahan nahi hain)
+    const markers = /\b(kya|kaise|kaisay|kitna|kitne|kitni|kahan|kab|kyun|kyu|nahi|nahin|hai|hain|ho|ka|ki|ke|ko|se|mein|ap|aap|tum|hum|mujhe|mera|meri|apka|apki|acha|theek|bhai|ji|kar|karo|karna|bata|batao|chahiye|milega|milegi|kiya|kaam|banwana|paisa|paise|banwa|chahta|chahti|chahye|batana|bataen|haan|shukriya|zaroor|abhi)\b/gi;
+    const score = (text.match(markers) || []).length;
+    const words = text.trim().split(/\s+/).length;
+    // Ek hi lafz se faisla nahi: kam az kam 2 nishaniyan, ya bohat chhota message
+    if (score >= 2 || (score === 1 && words <= 3)) return "roman";
     return "en";
   }
 
