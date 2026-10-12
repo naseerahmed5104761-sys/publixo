@@ -81,7 +81,7 @@
 
   // Lead capture state (AI naam/number khud samajhta hai, widget sirf yaad rakhta hai)
   let userMsgs = 0, chatLang = "en";
-  let leadName = "", leadPhone = "", leadDeclined = false, leadSubmitted = false;
+  let leadName = "", leadPhone = "", leadInterest = "", leadDeclined = false, leadSubmitted = false;
   let leadAsks = 0, sinceAsk = 0;
 
   const setStatus = (t) => { statusEl.textContent = t; };
@@ -95,7 +95,7 @@
     return d;
   }
 
-  add("Hello! 👋 I am Sara, welcome to PubliXo. Ask me about websites, Meta Ads, social media marketing or dynamic QR codes.", "bot");
+  add("Hi! 👋 I'm Sara from PubliXo. Ask me about websites, Meta Ads, social media or QR codes, or just say hello!", "bot");
 
   /* ---------- Language detection ---------- */
   function detectLang(text) {
@@ -295,6 +295,7 @@
         body: JSON.stringify({
           name: leadName,
           phone: leadPhone,
+          interest: leadInterest,
           lang: chatLang,
           page: location.href,
           chat: history.slice(-6),
@@ -312,6 +313,7 @@
     if (l.declined) leadDeclined = true;
     if (l.name) leadName = String(l.name).slice(0, 60);
     if (l.phone) leadPhone = String(l.phone);
+    if (l.interest) leadInterest = String(l.interest).slice(0, 120);
     if (l.asked) { leadAsks++; sinceAsk = 0; } else if (leadAsks > 0) sinceAsk++;
 
     if (leadName && leadPhone && !leadSubmitted) {
