@@ -19,6 +19,8 @@
   .pxm.me{background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#0a0f1e;align-self:flex-end;border-bottom-right-radius:4px}
   .pxm.interim{opacity:.55;font-style:italic}
   .pxm.rtl{direction:rtl;text-align:right}
+  .pxm.ask{border-left:3px solid #fbbf24;background:#222c3d}
+  .pxm.rtl.ask{border-left:0;border-right:3px solid #fbbf24}
   #pxOpts{display:flex;gap:6px;padding:8px 10px;background:#111827;border-top:1px solid rgba(245,158,11,.2);align-items:center}
   #pxOpts select{background:#1a2332;color:#fbbf24;border:none;border-radius:8px;font-size:12px;padding:8px 6px;cursor:pointer;min-width:0;flex:1}
   #pxLive{flex:0 0 auto;border:none;border-radius:20px;padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer;
@@ -352,12 +354,13 @@
     const leadInfo = {
       active: leadActive,
       ask_now: askNow,
+      just_asked: leadAsks > 0 && sinceAsk === 0,   // pichla jawab hi naam/number ka sawal tha
       name: leadName || null,
       phone: leadPhone || null,
       declined: leadDeclined,
     };
 
-    let reply = "";
+    let reply = "", followup = "";
     try {
       const r = await fetch(API, {
         method: "POST",
@@ -375,7 +378,8 @@
       reply = data.reply;
       wait.textContent = reply;
       if (/[\u0600-\u06FF]/.test(reply)) wait.classList.add("rtl");
-      history.push({ role: "user", content: text }, { role: "assistant", content: reply });
+      followup = data.followup ? String(data.followup) : "";
+      history.push({ role: "user", content: text }, { role: "assistant", content: reply + (followup ? " " + followup : "") });
       userMsgs++;   // sirf kamyab jawab wale sawal ginte hain
       applyLead(data.lead);
     } catch (e) {
@@ -388,10 +392,18 @@
       if (lang === "ur") wait.classList.add("rtl");
     }
     msgs.scrollTop = msgs.scrollHeight;
+
+    // Naam / number ka sawal alag bubble mein (thodi der baad, taake nazar aaye)
+    if (followup) {
+      await new Promise((res) => setTimeout(res, 600));
+      const q = add(followup, "bot ask");
+      if (/[\u0600-\u06FF]/.test(followup)) q.classList.add("rtl");
+    }
     busy = false;
 
+    const spoken = followup ? reply + " " + followup : reply;
     if (live || wasVoice) {
-      speak(reply, lang, () => { if (live) startListen(); else setStatus(IDLE); });
+      speak(spoken, lang, () => { if (live) startListen(); else setStatus(IDLE); });
     } else {
       setStatus(IDLE);
     }
