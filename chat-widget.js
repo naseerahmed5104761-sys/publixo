@@ -65,6 +65,9 @@
   // ========== 3. JAVASCRIPT LOGIC ==========
   const API = "https://wa-bot.naseersatti0301.workers.dev/chat";
   const LEAD_API = API.replace(/\/chat$/, "/lead");
+  const LEAD_END_API = API.replace(/\/chat$/, "/lead/end");
+  const END_IDLE_MS = 3 * 60 * 1000;   // itni der koi message na aaye to baat-cheet khatam maani jaye
+  const SID = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : (Date.now().toString(36) + Math.random().toString(36).slice(2, 12));
   const LEAD_AFTER = 3;           // itne sawalon ke baad naam/number poochho
   const IDLE = "Ask by text or voice";
   const $ = (id) => document.getElementById(id);
@@ -76,14 +79,17 @@
   // Listening: Urdu bolo -> ur-PK, English bolo -> en-IN (Pakistani/Indian accent ko behtar samajhta hai)
   const LISTEN_LANG_MAP = { en: "en-IN", roman: "en-IN", ur: "ur-PK", auto: "en-IN" };
   // Speaking: clean English = en-US, Urdu = ur-PK (Uzma)
-  const SPEAK_LANG_MAP  = { en: "en-US", roman: "en-IN", ur: "ur-PK", auto: "en-US" };
+  const SPEAK_LANG_MAP  = { en: "en-GB", roman: "en-IN", ur: "ur-PK", auto: "en-GB" };
+  // Bolne ki raftaar: 1 = normal, 0.8 = aur dheema. Apni pasand se badal sakte ho.
+  const SPEAK_RATE = { en: 0.88, roman: 0.9, ur: 0.9 };
 
   let history = [], busy = false, speaking = false, live = false, rec = null,
       usedVoice = false, interimEl = null, speakToken = 0, lastVoiceLang = "en";
 
   // Lead capture state (AI naam/number khud samajhta hai, widget sirf yaad rakhta hai)
   let userMsgs = 0, chatLang = "en";
-  let leadName = "", leadPhone = "", leadInterest = "", leadDeclined = false, leadSubmitted = false;
+  let leadName = "", leadPhone = "", leadInterest = "", leadDeclined = false, leadSubmitted = false; // leadSubmitted = naam+number mil gaye
+  let leadSent = false, endTimer = null;                                                                         // leadSent = email ka signal ja chuka
   let leadAsks = 0, sinceAsk = 0;
 
   const setStatus = (t) => { statusEl.textContent = t; };
@@ -132,7 +138,7 @@
   function pickVoice(langCode) {
     const all = synth ? synth.getVoices() : [];
     if (!all.length) return null;
-    const code = (langCode || "en-US").toLowerCase();
+    const code = (langCode || "en-GB").toLowerCase();
     const notMale = (v) => !MALE.test(v.name);
 
     // --- Urdu: Uzma pehle ---
@@ -153,8 +159,8 @@
       if (inPool.length) return best(inPool);
     }
 
-    // --- Clean English: en-US / en-GB female, Indian accent nahi ---
-    for (const group of [["en-us"], ["en-gb"], ["en-au", "en-ca"]]) {
+    // --- English: UK (en-GB) female pehle, phir US/AU/CA female. Indian accent nahi ---
+    for (const group of [["en-gb"], ["en-us"], ["en-au", "en-ca"]]) {
       const pool = all.filter((v) => group.includes(normLang(v)) && notMale(v));
       const f = pool.filter((v) => FEMALE.test(v.name));
       if (f.length) return best(f);
@@ -184,7 +190,7 @@
     if (!synth || !text) { done && done(); return; }
     stopSpeaking();
     const token = ++speakToken;
-    const speakLang = SPEAK_LANG_MAP[langCode] || "en-US";
+    const speakLang = SPEAK_LANG_MAP[langCode] || "en-GB";
     const voice = pickVoice(speakLang);
     const chunks = text.match(/[^.!?۔؟\n]+[.!?۔؟]?/g) || [text];
     speaking = true;
@@ -205,7 +211,7 @@
       const u = new SpeechSynthesisUtterance(piece);
       u.lang = voice ? voice.lang : speakLang;
       if (voice) u.voice = voice;
-      u.rate = langCode === "ur" ? 0.95 : 1;
+      u.rate = SPEAK_RATE[langCode] || 0.9;
       u.pitch = 1; // natural voice, no artificial pitch
       u.onend = next;
       u.onerror = next;
@@ -293,24 +299,56 @@
     ur: "شکریہ {name}! ابھی آپ کی تفصیلات نہیں بھیج سکی۔ براہ کرم 0301 5394177 پر واٹس ایپ کریں۔",
   };
 
+  // Naam + number mil gaye: server par "pending" save karo. Email ABHI nahi jati.
   async function submitLead() {
     try {
       const r = await fetch(LEAD_API, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          sid: SID,
           name: leadName,
           phone: leadPhone,
           interest: leadInterest,
           lang: chatLang,
           page: location.href,
-          chat: history.slice(-6),
+          chat: history.slice(-40),
         }),
       });
       return r.ok;
     } catch (e) {
       return false;
     }
+  }
+
+  // Baat-cheet khatam: ab poori conversation ke saath email jaye (sirf ek dafa)
+  function finalizeLead(reason, viaBeacon) {
+    if (!leadSubmitted || leadSent) return;
+    leadSent = true;
+    clearTimeout(endTimer);
+    const payload = JSON.stringify({
+      sid: SID, reason: reason,
+      name: leadName, phone: leadPhone, interest: leadInterest,
+      lang: chatLang, page: location.href, chat: history.slice(-40),
+    });
+    try {
+      if (viaBeacon && navigator.sendBeacon) {
+        navigator.sendBeacon(LEAD_END_API, new Blob([payload], { type: "text/plain;charset=UTF-8" }));
+        return;
+      }
+      fetch(LEAD_END_API, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=UTF-8" },
+        body: payload,
+        keepalive: true,   // page band ho tab bhi request poori ho
+      }).catch(() => {});
+    } catch (e) {}
+  }
+
+  // Har message ke baad timer dobara shuru: 3 minute khamoshi = baat-cheet khatam
+  function scheduleEnd() {
+    clearTimeout(endTimer);
+    if (leadSubmitted && !leadSent) endTimer = setTimeout(() => finalizeLead("idle"), END_IDLE_MS);
   }
 
   // AI ne jo naam/number/inkar samjha, wo yahan yaad rakho
@@ -330,6 +368,7 @@
           add(LEAD_FAIL[k].replace("{name}", leadName), "bot");
         }
       });
+      scheduleEnd();
     }
   }
 
@@ -404,6 +443,7 @@
       if (/[\u0600-\u06FF]/.test(followup)) q.classList.add("rtl");
     }
     busy = false;
+    scheduleEnd();
 
     const spoken = followup ? reply + " " + followup : reply;
     if (live || wasVoice) {
@@ -443,10 +483,11 @@
   }
 
   /* ---------- Open / close ---------- */
-  $("pxBtn").onclick = () => { box.classList.toggle("open"); if (box.classList.contains("open")) input.focus(); else stopLive(); };
-  $("pxClose").onclick = () => { box.classList.remove("open"); stopLive(); };
+  $("pxBtn").onclick = () => { box.classList.toggle("open"); if (box.classList.contains("open")) input.focus(); else { stopLive(); finalizeLead("closed"); } };
+  $("pxClose").onclick = () => { box.classList.remove("open"); stopLive(); finalizeLead("closed"); };
   langSel.onchange = () => { if (speaking) stopSpeaking(); };
 
   if (synth) { synth.getVoices(); synth.onvoiceschanged = () => synth.getVoices(); }
   window.addEventListener("beforeunload", () => { stopSpeaking(); });
+  window.addEventListener("pagehide", () => { finalizeLead("left page", true); });
 })();
