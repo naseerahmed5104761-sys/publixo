@@ -1,4 +1,4 @@
-/* ===== PubliXo AI Chat Widget — Multi-language (EN / Roman Urdu / اردو), Girl Voice + Lead Capture ===== */
+/* ===== PubliXo AI Chat Widget — Multi-language (EN / Roman Urdu / اردو), Piper British Jenny + Lead Capture ===== */
 (function () {
   // ========== 1. CSS INJECT ==========
   const style = document.createElement('style');
@@ -78,7 +78,7 @@
 
   // Listening: Urdu bolo -> ur-PK, English bolo -> en-IN (Pakistani/Indian accent ko behtar samajhta hai)
   const LISTEN_LANG_MAP = { en: "en-IN", roman: "en-IN", ur: "ur-PK", auto: "en-IN" };
-  // Speaking: clean English = en-US, Urdu = ur-PK (Uzma)
+  // Browser-voice fallback: English = en-GB, Urdu = ur-PK (Uzma)
   const SPEAK_LANG_MAP  = { en: "en-GB", roman: "en-IN", ur: "ur-PK", auto: "en-GB" };
   // Bolne ki raftaar: 1 = normal, 0.8 = aur dheema. Apni pasand se badal sakte ho.
   const SPEAK_RATE = { en: 0.88, roman: 0.9, ur: 0.9 };
@@ -105,6 +105,42 @@
 
   add("Hi! 👋 I'm Sara from PubliXo. Ask me about websites, Meta Ads, social media or QR codes, or just say hello!", "bot");
 
+  /* ---------- Piper: British Jenny (English replies only) ---------- */
+  const ORT_URL     = "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.18.0/dist/ort.wasm.min.js";
+  const PIPER_BASE  = "https://cdn.jsdelivr.net/npm/@mintplex-labs/piper-tts-web@1.0.5/dist/";
+  const PIPER_VOICE = "en_GB-jenny_dioco-medium";
+  const PIPER_RATE  = 0.95;   // 1 = normal speed
+  let piperSession = null, piperPromise = null, curAudio = null, curRes = null;
+
+  function loadScript(u) {
+    return new Promise((res, rej) => {
+      if (window.ort) return res();
+      const s = document.createElement("script");
+      s.src = u; s.onload = res; s.onerror = rej;
+      document.head.appendChild(s);
+    });
+  }
+
+  // Engine + voice model ek dafa load hota hai (~60 MB pehli baar, phir browser cache).
+  // Jab tak tayyar na ho, English bhi browser voice mein bolegi.
+  function warmPiper() {
+    if (piperPromise) return piperPromise;
+    piperPromise = (async () => {
+      await loadScript(ORT_URL);
+      let src = await (await fetch(PIPER_BASE + "piper-tts-web.js")).text();
+      src = src
+        .replace('import("./piper-o91UDS6e.js")', 'import("' + PIPER_BASE + 'piper-o91UDS6e.js")')
+        .replace('import("./voices_static-D_OtJDHM.js")', 'import("' + PIPER_BASE + 'voices_static-D_OtJDHM.js")')
+        .replace('import("onnxruntime-web/wasm")', "Promise.resolve(window.ort)");
+      const mod = await import(URL.createObjectURL(new Blob([src], { type: "text/javascript" })));
+      const s = await mod.TtsSession.create({ voiceId: PIPER_VOICE });
+      await s.predict("Hello.");
+      piperSession = s;
+      console.log("[PubliXo] Piper voice ready:", PIPER_VOICE);
+    })().catch((e) => { console.warn("[PubliXo] Piper load failed, using browser voice:", e); });
+    return piperPromise;
+  }
+
   /* ---------- Language detection ---------- */
   function detectLang(text) {
     if (/[\u0600-\u06FF]/.test(text)) return "ur";
@@ -123,7 +159,7 @@
     return sel;
   }
 
-  /* ---------- Voice picking ---------- */
+  /* ---------- Browser voice picking (fallback + Urdu) ---------- */
   const FEMALE = /uzma|sonia|libby|maisie|hazel|susan|kate|serena|martha|stephanie|female|woman|girl|samantha|zira|aria|jenny|michelle|emma|olivia|ava|allison|joanna|salli|kendra|kimberly|amy|nicole|raveena|heera|swara|kalpana|neerja|aditi|priya|veena|zariyah|hala|salma|layla|amina/i;
   // \b zaroori hai warna "female" ke andar "male" match ho jata hai
   const MALE = /\b(ryan|thomas|george|daniel|oliver|arthur|alfie|male|man|boy|david|mark|guy|alex|fred|rishi|prabhat|hemant|madhur|ravi|kunal|asad|salman|liam|james|brian|eric|roger|steffan)\b/i;
@@ -183,10 +219,60 @@
     speaking = false;
     speakToken++;
     synth && synth.cancel();
+    if (curAudio) { try { curAudio.pause(); } catch (e) {} curAudio = null; }
+    if (curRes) { const r = curRes; curRes = null; r(); }
+  }
+
+  function playUrl(url) {
+    return new Promise((res) => {
+      const a = new Audio(url);
+      a.playbackRate = PIPER_RATE;
+      curAudio = a; curRes = res;
+      const end = () => { if (curAudio === a) { curAudio = null; curRes = null; } res(); };
+      a.onended = end; a.onerror = end;
+      a.play().catch(end);
+    });
+  }
+
+  // Piper British Jenny: jumla-ba-jumla, agla jumla tayyar hota rehta hai jab tak pehla chal raha ho
+  function piperSpeak(text, done) {
+    stopSpeaking();
+    const token = ++speakToken;
+    speaking = true;
+    stopListen();
+    setStatus("Speaking... 🔊");
+    const chunks = (text.match(/[^.!?\n]+[.!?]?/g) || [text]).map((c) => c.trim()).filter(Boolean);
+    const gen = (c) => piperSession.predict(c).then((b) => URL.createObjectURL(b));
+    (async () => {
+      try {
+        let nextP = gen(chunks[0]);
+        for (let i = 0; i < chunks.length; i++) {
+          const url = await nextP;
+          if (token !== speakToken) { URL.revokeObjectURL(url); return; }
+          nextP = i + 1 < chunks.length ? gen(chunks[i + 1]) : null;
+          await playUrl(url);
+          URL.revokeObjectURL(url);
+          if (token !== speakToken) return;
+        }
+        if (token !== speakToken || !speaking) return;
+        speaking = false;
+        done && done();
+      } catch (e) {
+        console.warn("[PubliXo] Piper speak failed, using browser voice:", e);
+        if (token === speakToken) browserSpeak(text, "en", done);
+      }
+    })();
   }
 
   function speak(text, langCode, done) {
     text = cleanForSpeech(text);
+    if (!text) { done && done(); return; }
+    // English jawab + Piper tayyar -> British Jenny. Urdu / Roman Urdu -> browser voice.
+    if (piperSession && langCode === "en" && !/[\u0600-\u06FF]/.test(text)) return piperSpeak(text, done);
+    browserSpeak(text, langCode, done);
+  }
+
+  function browserSpeak(text, langCode, done) {
     if (!synth || !text) { done && done(); return; }
     stopSpeaking();
     const token = ++speakToken;
@@ -276,6 +362,7 @@
   /* ---------- Live mode ---------- */
   function startLive() {
     if (!SR) { add("Your browser doesn't support voice input. Please use Chrome or Edge.", "bot"); return; }
+    warmPiper();
     live = true;
     liveBtn.classList.add("on");
     liveBtn.textContent = "⏹ Stop";
@@ -464,6 +551,7 @@
     mic.onclick = () => {
       if (live) return;
       if (rec) { stopListen(); return; }
+      warmPiper();
       const r = new SR();
       rec = r;
       const selLang = langSel.value === "auto" ? lastVoiceLang : langSel.value;
@@ -483,7 +571,8 @@
   }
 
   /* ---------- Open / close ---------- */
-  $("pxBtn").onclick = () => { box.classList.toggle("open"); if (box.classList.contains("open")) input.focus(); else { stopLive(); finalizeLead("closed"); } };
+  // Chat khulte hi Piper voice download shuru ho jati hai taake bolne tak tayyar ho
+  $("pxBtn").onclick = () => { box.classList.toggle("open"); if (box.classList.contains("open")) { input.focus(); warmPiper(); } else { stopLive(); finalizeLead("closed"); } };
   $("pxClose").onclick = () => { box.classList.remove("open"); stopLive(); finalizeLead("closed"); };
   langSel.onchange = () => { if (speaking) stopSpeaking(); };
 
