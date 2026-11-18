@@ -597,4 +597,64 @@
                     <h3>Creative Services</h3>
                     <ul>
                         <li><i class="fas fa-circle"></i> Social Media Designs</li>
-                        <li><i class="fas
+                        <li><i class="fas fa-circle"></i> Ad Creatives</li>
+                        <li><i class="fas fa-circle"></i> Business Graphics</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== CTA ===== -->
+    <section class="section cta-section" id="contact">
+        <div class="section-container">
+            <div class="cta-content fade-up">
+                <div class="cta-logo-wrap">
+                    <div class="cta-logo-inner">
+                        <img src="https://i.postimg.cc/RZFksC27/logo.jpg" alt="PubliXo Logo">
+                    </div>
+                </div>
+                <h2>Ready to <span class="gold">Grow Your Business</span> Online?</h2>
+                <p>Get in touch with PubliXo for professional Web Development, WordPress Development, Meta Ads, Social Media Management, Digital Marketing, and AI Chatbot solutions.</p>
+                <div class="cta-buttons">
+                    <a href="https://wa.me/923015394177" class="btn btn-whatsapp" target="_blank"><i class="fab fa-whatsapp"></i> WhatsApp Now</a>
+                    <a href="tel:+923015394177" class="btn btn-outline-gold"><i class="fas fa-phone"></i> Call Us</a>
+                </div>
+                <div class="cta-contact-info">
+                    <i class="fab fa-whatsapp"></i>
+                    <span>Call / WhatsApp: <strong>0301 5394177</strong></span>
+                </div>
+                <p class="cta-tagline">
+                    Publi<span class="blue">X</span><span class="gold">o</span> — Publishing & Beyond<br>
+                    <span style="color: #475569;">Your Vision. Our Development.</span>
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== FOOTER (auto-injected by footer.js) ===== -->
+
+    <!-- ============================================================
+         SINGLE-LINE ATTACHMENTS
+         ============================================================ -->
+    <script src="header.js"></script>
+    <script src="footer.js"></script>
+    <script src="chat-widget.js"></script>
+
+    <!-- Page-only script: fade-up scroll animations -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+            document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+        });
+    </script>
+</body>
+</html>
