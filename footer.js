@@ -1,8 +1,5 @@
 /* ============================================================
-   PubliXo — footer.js
-   Contains the full footer markup and its CSS. Add
-   <script src="footer.js"></script> anywhere and the footer is
-   built automatically at the bottom of the page.
+   PubliXo — footer.js (Updated with Privacy Policy link)
    ============================================================ */
 
 (function () {
@@ -53,7 +50,7 @@
                     </div>
                 </div>
                 <div class="footer-bottom">
-                    <p>&copy; 2026 PubliXo. All rights reserved.</p>
+                    <p>&copy; 2026 PubliXo. All rights reserved. <a href="Privacy-Policy.html" class="footer-privacy-link">Privacy Policy</a></p>
                     <span class="tagline">Your Vision. Our Development.</span>
                     <div class="footer-social">
                         <a href="https://wa.me/923015394177" target="_blank" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
@@ -144,6 +141,21 @@
 
         .footer-bottom p { font-size: 0.82rem; margin: 0; }
 
+        /* ===== NEW: Privacy Policy link styling ===== */
+        .footer-privacy-link {
+            color: #fbbf24;
+            text-decoration: none;
+            margin-left: 6px;
+            padding-left: 10px;
+            border-left: 1px solid rgba(245, 158, 11, 0.25);
+            transition: color 0.2s ease;
+        }
+
+        .footer-privacy-link:hover {
+            color: #f59e0b;
+            text-decoration: underline;
+        }
+
         .footer-bottom .tagline {
             font-family: 'Cinzel', serif;
             font-style: italic;
@@ -183,6 +195,7 @@
         @media (max-width: 768px) {
             .footer-grid { grid-template-columns: 1fr; gap: 32px; }
             .footer-bottom { flex-direction: column; text-align: center; }
+            .footer-privacy-link { display: block; margin-left: 0; padding-left: 0; border-left: none; margin-top: 6px; }
         }
     `;
 
