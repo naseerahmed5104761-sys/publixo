@@ -50,7 +50,7 @@
                     </div>
                 </div>
                 <div class="footer-bottom">
-                    <p>&copy; 2026 PubliXo. All rights reserved. <a href="Privacy-Policy.html" class="footer-privacy-link">Privacy Policy</a></p>
+                    <p>&copy; 2026 PubliXo. All rights reserved. <a href="/privacy-policy.html" class="footer-privacy-link">Privacy Policy</a></p>
                     <span class="tagline">Your Vision. Our Development.</span>
                     <div class="footer-social">
                         <a href="https://wa.me/923015394177" target="_blank" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
